@@ -4,7 +4,7 @@ class TextStyles {
   static const TextStyle defaultText = TextStyle(
     fontFamily: 'Poppins',
     fontWeight: FontWeight.w400, // Regular
-    fontSize: 14,
+    fontSize: 12,
     color: Colors.white, // #FFFFFF
   );
   
