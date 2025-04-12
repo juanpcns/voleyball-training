@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:voleyballtraining/Views/Screen/Start_View.dart';
-import 'Views/Styles/templates/container_default.dart';
-import 'Views/Styles/templates/home_view.dart';
-import 'Views/Styles/tipography/text_styles.dart';
-import 'Views/Styles/buttons/button_styles.dart';
 
 void main() {
   runApp(const MyApp());
@@ -26,13 +22,8 @@ class MainScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          const HomeView(),
-          StartView(),
-        ],
-      ),
+    return const Scaffold(
+      body: StartView(), // Ya incluye el fondo y todo el contenido
     );
   }
 }
