@@ -1,0 +1,157 @@
+USE master;
+GO
+CREATE DATABASE VoleyTraining;
+GO
+USE VoleyTraining;
+GO
+
+-- 1. Tabla de Roles
+PRINT 'Creando tabla Roles...';
+CREATE TABLE Roles (
+    RoleID INT IDENTITY(1,1) PRIMARY KEY,
+    RoleName NVARCHAR(50) UNIQUE NOT NULL -- 'Entrenador', 'Jugador'
+);
+GO
+
+-- Poblar Roles iniciales
+INSERT INTO Roles (RoleName) VALUES ('Entrenador'), ('Jugador');
+GO
+
+PRINT 'Tabla Roles creada y poblada.';
+GO
+
+-- 2. Tabla de Usuarios
+PRINT 'Creando tabla Users...';
+CREATE TABLE Users (
+    UserID INT IDENTITY(1,1) PRIMARY KEY,
+    FullName NVARCHAR(150) NOT NULL,       -- HU1
+    IdNumber NVARCHAR(50) UNIQUE NULL,    -- HU1 (Cedula - Asumiendo que puede ser opcional)
+    DateOfBirth DATE NULL,                 -- HU1
+    Email NVARCHAR(255) UNIQUE NOT NULL,   -- HU1 (Para login)
+    PhoneNumber NVARCHAR(50) NULL,         -- HU1
+    PasswordHash NVARCHAR(MAX) NOT NULL,   -- Hash de la contraseña
+    RoleID INT NOT NULL,                   -- HU1 (Rol del usuario)
+    CreatedAt DATETIME2 DEFAULT GETDATE(), -- Fecha de registro
+
+    -- Llave foránea a Roles
+    CONSTRAINT FK_Users_Roles FOREIGN KEY (RoleID) REFERENCES Roles(RoleID)
+);
+GO
+
+-- Crear índice en Email para búsquedas rápidas (login)
+CREATE INDEX IX_Users_Email ON Users(Email);
+GO
+
+PRINT 'Tabla Users creada.';
+GO
+
+-- 3. Tabla de Planes de Entrenamiento
+PRINT 'Creando tabla TrainingPlans...';
+CREATE TABLE TrainingPlans (
+    PlanID INT IDENTITY(1,1) PRIMARY KEY,
+    CreatorUserID INT NOT NULL,           -- HU5 (Entrenador que creó el plan)
+    PlanName NVARCHAR(100) NOT NULL,      -- HU5
+    AverageDailyTime NVARCHAR(50) NULL,   -- HU5 (Ej: "30 minutos")
+    Description NVARCHAR(500) NULL,       -- Descripción adicional opcional
+    CreatedAt DATETIME2 DEFAULT GETDATE(),
+
+    -- Llave foránea al usuario creador
+    CONSTRAINT FK_TrainingPlans_Users FOREIGN KEY (CreatorUserID) REFERENCES Users(UserID)
+    -- Opcional: Constraint para asegurar que CreatorUserID es un Entrenador
+    -- CONSTRAINT CK_TrainingPlans_CreatorIsCoach CHECK (...) -- Requiere una función o lógica más compleja
+);
+GO
+
+PRINT 'Tabla TrainingPlans creada.';
+GO
+
+-- 4. Tabla de Ejercicios
+PRINT 'Creando tabla Exercises...';
+CREATE TABLE Exercises (
+    ExerciseID INT IDENTITY(1,1) PRIMARY KEY,
+    ExerciseName NVARCHAR(150) UNIQUE NOT NULL,
+    Description NVARCHAR(MAX) NULL
+);
+GO
+
+PRINT 'Tabla Exercises creada.';
+GO
+
+-- 5. Tabla de Unión Plan-Ejercicios (Muchos a Muchos)
+PRINT 'Creando tabla PlanExercises...';
+CREATE TABLE PlanExercises (
+    PlanExerciseID INT IDENTITY(1,1) PRIMARY KEY,
+    PlanID INT NOT NULL,                   -- Plan al que pertenece el ejercicio
+    ExerciseID INT NOT NULL,               -- Ejercicio incluido en el plan
+    OrderInPlan INT NOT NULL,              -- HU5 (Orden del ejercicio en el plan)
+
+    -- Llaves foráneas
+    CONSTRAINT FK_PlanExercises_TrainingPlans FOREIGN KEY (PlanID) REFERENCES TrainingPlans(PlanID) ON DELETE CASCADE, -- Si se borra el plan, se borran sus ejercicios asociados
+    CONSTRAINT FK_PlanExercises_Exercises FOREIGN KEY (ExerciseID) REFERENCES Exercises(ExerciseID),
+
+    -- Constraints para asegurar la unicidad del orden dentro de un plan
+    CONSTRAINT UQ_PlanExercises_PlanOrder UNIQUE (PlanID, OrderInPlan),
+    -- Opcional: Constraint para evitar duplicados del mismo ejercicio en un plan
+    -- CONSTRAINT UQ_PlanExercises_PlanExercise UNIQUE (PlanID, ExerciseID)
+);
+GO
+
+PRINT 'Tabla PlanExercises creada.';
+GO
+
+-- 6. Tabla de Estados de Asignación de Plan
+PRINT 'Creando tabla PlanAssignmentStatus...';
+CREATE TABLE PlanAssignmentStatus (
+    StatusID INT IDENTITY(1,1) PRIMARY KEY,
+    StatusName NVARCHAR(20) UNIQUE NOT NULL -- 'Pendiente', 'Aceptado', 'Rechazado' (HU15)
+);
+GO
+
+-- Poblar Estados iniciales
+INSERT INTO PlanAssignmentStatus (StatusName) VALUES ('Pendiente'), ('Aceptado'), ('Rechazado');
+GO
+
+-- Obtener el ID del estado 'Pendiente' para usarlo como default
+DECLARE @DefaultStatusID INT;
+SELECT @DefaultStatusID = StatusID FROM PlanAssignmentStatus WHERE StatusName = 'Pendiente';
+GO
+
+PRINT 'Tabla PlanAssignmentStatus creada y poblada.';
+GO
+
+-- 7. Tabla de Asignaciones de Planes a Jugadores
+PRINT 'Creando tabla PlanAssignments...';
+CREATE TABLE PlanAssignments (
+    AssignmentID INT IDENTITY(1,1) PRIMARY KEY,
+    PlanID INT NOT NULL,                   -- HU9 (Plan asignado)
+    PlayerUserID INT NOT NULL,             -- HU9 (Jugador al que se asigna)
+    AssignedByUserID INT NOT NULL,         -- HU9 (Entrenador que asigna)
+    StatusID INT NOT NULL,                 -- HU15 (Estado actual de la asignación)
+    AssignedAt DATETIME2 DEFAULT GETDATE(), -- Fecha de asignación
+    RespondedAt DATETIME2 NULL,            -- Fecha de aceptación/rechazo
+
+    -- Llaves foráneas
+    CONSTRAINT FK_PlanAssignments_TrainingPlans FOREIGN KEY (PlanID) REFERENCES TrainingPlans(PlanID),
+    CONSTRAINT FK_PlanAssignments_PlayerUser FOREIGN KEY (PlayerUserID) REFERENCES Users(UserID),
+    CONSTRAINT FK_PlanAssignments_AssignerUser FOREIGN KEY (AssignedByUserID) REFERENCES Users(UserID),
+    CONSTRAINT FK_PlanAssignments_Status FOREIGN KEY (StatusID) REFERENCES PlanAssignmentStatus(StatusID),
+
+    -- Establecer el estado por defecto como 'Pendiente'
+    CONSTRAINT DF_PlanAssignments_Status DEFAULT @DefaultStatusID FOR StatusID
+
+    -- Opcional: Constraints para asegurar que PlayerUserID es un Jugador y AssignedByUserID es un Entrenador
+    -- CONSTRAINT CK_PlanAssignments_PlayerIsJugador CHECK (...)
+    -- CONSTRAINT CK_PlanAssignments_AssignerIsCoach CHECK (...)
+);
+GO
+
+-- Crear índices para búsquedas comunes en asignaciones
+CREATE INDEX IX_PlanAssignments_PlayerUser ON PlanAssignments(PlayerUserID);
+CREATE INDEX IX_PlanAssignments_Status ON PlanAssignments(StatusID);
+GO
+
+PRINT 'Tabla PlanAssignments creada.';
+GO
+
+PRINT '*** Script de creación de base de datos completado. ***';
+GO
