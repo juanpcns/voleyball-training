@@ -11,7 +11,14 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
-
+  firebase_core: ^2.32.0 # Usa la última versión disponible
+  # Firebase Authentication
+  firebase_auth: ^4.20.0 # Usa la última versión disponible
+  # Cloud Firestore
+  cloud_firestore: ^4.17.5 # Usa la última versión disponible
+  # State Management (Ejemplo con Provider)
+  provider: ^6.1.2 # Usa la última versión disponible
+  cupertino_icons: ^1.0.6 # Usa la última versión disponible
 dev_dependencies:
   flutter_test:
     sdk: flutter
