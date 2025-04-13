@@ -1,4 +1,4 @@
-// lib/main.dart
+// lib/main.dart (Versión Final con Todos los Providers Correctos)
 
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -8,23 +8,24 @@ import 'package:provider/provider.dart'; // Importa Provider
 // Importa el archivo de opciones generado por FlutterFire
 import 'firebase_options.dart';
 
-// --- Asegúrate que estas rutas sean correctas según tu estructura ---
+// --- Importa tus clases ---
+// (Asegúrate que estas rutas sean correctas para tu proyecto)
 import 'repositories/auth_repository_base.dart';
 import 'repositories/firebase_auth_repository.dart';
 import 'repositories/user_repository_base.dart';
 import 'repositories/firestore_user_repository.dart';
-import 'Providers/auth_provider.dart';
-import 'auth_wrapper.dart'; // Importa el AuthWrapper que creamos
-// --- Fin de Imports ---
+import 'providers/auth_provider.dart';
+import 'auth_wrapper.dart'; // El widget que decide entre AuthView y HomeView
+// --- Fin Imports ---
 
 void main() async {
-  // Necesario para asegurar que Flutter esté listo antes de Firebase.
+  // Necesario para asegurar que Flutter esté listo antes de usar plugins
   WidgetsFlutterBinding.ensureInitialized();
-  // Inicializa Firebase usando las opciones generadas por FlutterFire.
+  // Inicializa Firebase
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  // Ejecuta la aplicación principal.
+  // Inicia la aplicación
   runApp(const MyApp());
 }
 
@@ -33,47 +34,57 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // MultiProvider para inyectar/proporcionar nuestros servicios y estados.
+    // MultiProvider para inyectar/proporcionar los servicios y estados.
     return MultiProvider(
       providers: [
-        // 1. Proporciona la implementación del AuthRepository.
+        // --- Proveedores de Servicios (Repositorios) ---
+
+        // 1. Repositorio de Autenticación (Base)
         Provider<AuthRepositoryBase>(
           create: (_) => FirebaseAuthRepository(),
         ),
-        // 2. Proporciona la implementación del UserRepository.
+
+        // 2. Repositorio de Datos de Usuario (Base)
         Provider<UserRepositoryBase>(
           create: (_) => FirestoreUserRepository(),
         ),
-        // 3. StreamProvider para el estado de autenticación (User?).
-        //    Lee AuthRepositoryBase para obtener el stream.
-        StreamProvider<User?>.value(
-          value: context.read<AuthRepositoryBase>().authStateChanges,
-          initialData: null, // Estado inicial mientras carga.
-           catchError: (_, err) { // Manejo básico de errores en el stream.
-              print('Error en authStateChanges StreamProvider: $err');
-              return null;
-           },
+
+        // --- Proveedores de Estado y Streams ---
+
+        // 3. ProxyProvider para el Stream de Estado de Autenticación (User?)
+        //    Depende de AuthRepositoryBase. Provee el Stream<User?>.
+        ProxyProvider<AuthRepositoryBase, Stream<User?>>(
+          update: (context, authRepo, previousStream) => authRepo.authStateChanges,
         ),
-        // 4. ChangeNotifierProvider para el AuthProvider (ViewModel).
-        //    Lee ambos repositorios para pasarlos a su constructor.
-        ChangeNotifierProvider<AuthProvider>(
+
+        // 4. ChangeNotifierProxyProvider2 para el AuthProvider (ViewModel)
+        //    Depende de AuthRepositoryBase y UserRepositoryBase. Provee AuthProvider.
+        ChangeNotifierProxyProvider2<AuthRepositoryBase, UserRepositoryBase, AuthProvider>(
+          // Crea la instancia inicial leyendo las dependencias ya provistas.
           create: (context) => AuthProvider(
-            context.read<AuthRepositoryBase>(),
-            context.read<UserRepositoryBase>(),
+              context.read<AuthRepositoryBase>(),
+              context.read<UserRepositoryBase>(),
           ),
+          // Actualiza (o simplemente devuelve la existente) cuando las dependencias cambian.
+          update: (context, authRepo, userRepo, previousAuthProvider) =>
+              previousAuthProvider ?? AuthProvider(authRepo, userRepo),
         ),
+
+        // --- Otros providers globales irían aquí ---
       ],
-      // El hijo del MultiProvider es la MaterialApp.
+
+      // El hijo del MultiProvider es MaterialApp.
       child: MaterialApp(
-        title: 'Voley App', // Puedes cambiar el título.
+        title: 'Voley App', // Título de la aplicación
         theme: ThemeData(
-          // Define tu tema aquí.
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue), // Ejemplo
+          // Tema visual
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple), // Cambia el color si quieres
           useMaterial3: true,
         ),
-        // El punto de entrada visual ahora es AuthWrapper.
+        // El widget 'home' es el AuthWrapper, que manejará la navegación inicial.
         home: const AuthWrapper(),
-        debugShowCheckedModeBanner: false, // Quita el banner "Debug".
+        // Quita el banner "DEBUG".
+        debugShowCheckedModeBanner: false,
       ),
     );
   }

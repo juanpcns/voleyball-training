@@ -24,7 +24,7 @@ class FirestoreUserRepository implements UserRepositoryBase {
       // .set(user.toMap()) guarda los datos del mapa en ese documento.
       // Si el documento ya existe, .set() lo sobrescribe.
       await _usersCollection.doc(user.userId).set(user.toMap());
-    } on FirebaseException catch (e) {
+    } on FirebaseException {
       // Captura errores específicos de Firestore y relánzalos.
       // La capa superior (Provider/ViewModel) decidirá cómo informar al usuario.
       // POSIBLE PRINT AQUI print('Error Firestore al crear perfil: $e');
@@ -49,7 +49,7 @@ class FirestoreUserRepository implements UserRepositoryBase {
         // Si no existe un perfil para ese ID, devuelve null.
         return null;
       }
-    } on FirebaseException catch (e) {
+    } on FirebaseException {
       // print('Error Firestore al obtener perfil: $e');
       rethrow;
     } catch (e) {
