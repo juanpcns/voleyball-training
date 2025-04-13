@@ -1,4 +1,4 @@
-// lib/providers/user_provider.dart
+// lib/providers/user_provider.dart (COMPLETO con getter playerUsers y typo corregido)
 
 import 'dart:async';
 import 'package:flutter/foundation.dart';
@@ -17,47 +17,39 @@ class UserProvider with ChangeNotifier {
   StreamSubscription? _usersSubscription;
 
   // --- Getters ---
-  List<UserModel> get users => _users;
+  List<UserModel> get users => _users; // Todos los usuarios
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
+  /// *** GETTER AÑADIDO: Filtra la lista para obtener solo Jugadores ***
+  List<UserModel> get playerUsers =>
+      _users.where((user) => user.role == 'Jugador').toList();
+  // --- Fin Getter Añadido ---
+
   // --- Métodos ---
 
-  /// Carga y escucha la lista de usuarios. Devuelve Future<void> para onRefresh.
-  /// *** CAMBIO: Añadido 'async' ***
+  /// Carga y escucha la lista de todos los usuarios.
   Future<void> loadUsers() async {
-    // Evitar múltiples cargas simultáneas si ya está cargando
-    // Aunque para pull-to-refresh podríamos querer permitirlo.
-    // Por ahora, si ya carga, no hacemos nada más aquí.
-    // if (_isLoading) return;
-
     if (kDebugMode) print("--- UserProvider: Iniciando carga/escucha de usuarios ---");
-    // Usaremos un helper para actualizar estado y notificar
-    _updateUserState(loading: true, error: null);
+    _updateUserState(loading: true, error: null); // Usa helper para notificar
 
-    // Cancelar suscripción anterior es importante
-    // Usamos await para asegurar que se complete antes de seguir (opcional, pero más claro)
-    await _usersSubscription?.cancel();
-
+    await _usersSubscription?.cancel(); // Cancela anterior
     _usersSubscription = _userRepository.getUsers().listen(
       (fetchedUsers) {
         if (kDebugMode) print("--- UserProvider: Usuarios recibidos: ${fetchedUsers.length} ---");
         _users = fetchedUsers;
-        _updateUserState(loading: false); // Actualizar estado y notificar
+        _updateUserState(loading: false); // Usa helper para notificar
       },
       onError: (error) {
         if (kDebugMode) print("--- UserProvider: ERROR en stream de usuarios: $error ---");
-        _users = []; // Vaciar lista
+        _users = [];
         _updateUserState(loading: false, error: "No se pudieron cargar los usuarios: ${error.toString()}");
       },
       onDone: () {
         if (kDebugMode) print("--- UserProvider: Stream de usuarios cerrado ---");
-        _updateUserState(loading: false); // Asegurar que la carga termine
+        _updateUserState(loading: false); // Asegurar que pare la carga
       }
     );
-
-    // El Future se completa aquí (iniciar la escucha es rápido).
-    // RefreshIndicator usará el estado 'isLoading' para saber cuándo parar.
   }
 
 
@@ -65,30 +57,11 @@ class UserProvider with ChangeNotifier {
   /// Helper para actualizar el estado y notificar a los listeners una sola vez.
   void _updateUserState({bool? loading, String? error}) {
       bool changed = false;
-      // Actualizar estado de carga si es diferente
-      if (loading != null && _isLoading != loading) {
-          _isLoading = loading;
-          changed = true;
-      }
-      // Limpiar error si empezamos a cargar O si se provee un error null explícito
-      if ((loading == true && _errorMessage != null) || (error == null && _errorMessage != null)) {
-           _errorMessage = null;
-           changed = true;
-      }
-      // Asignar nuevo error si viene uno y es diferente
-      if (error != null && _errorMessage != error) {
-          _errorMessage = error;
-          changed = true;
-      }
-      // Notificar solo si algo cambió
-      if (changed) {
-          notifyListeners();
-      }
+      if (loading != null && _isLoading != loading) { _isLoading = loading; changed = true; }
+      if ((loading == true && _errorMessage != null) || (error == null && _errorMessage != null)) { _errorMessage = null; changed = true; }
+      if (error != null && _errorMessage != error) { _errorMessage = error; changed = true; }
+      if (changed) { notifyListeners(); }
   }
-
-  // Ya no necesitamos _setLoading y _setError separados si usamos el helper _updateUserState
-  // void _setLoading(bool loadingState){ ... }
-  // void _setError(String? message){ ... }
 
 
   // --- Cleanup ---
@@ -98,5 +71,4 @@ class UserProvider with ChangeNotifier {
     _usersSubscription?.cancel();
     super.dispose();
   }
-
-}
+} // <-- Llave de cierre correcta para la clase
