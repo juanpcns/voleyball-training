@@ -1,4 +1,4 @@
-// lib/main.dart (Versión Completa con todos los Providers)
+// lib/main.dart (Completo - Versión Final con todos los Providers)
 
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -14,70 +14,69 @@ import 'repositories/auth_repository_base.dart';
 import 'repositories/firebase_auth_repository.dart';
 import 'repositories/user_repository_base.dart';
 import 'repositories/firestore_user_repository.dart';
-import 'repositories/training_plan_repository_base.dart'; // Importar interfaz
-import 'repositories/firestore_training_plan_repository.dart'; // Importar implementación
+import 'repositories/training_plan_repository_base.dart';
+import 'repositories/firestore_training_plan_repository.dart';
+import 'repositories/plan_assignment_repository_base.dart';
+import 'repositories/firestore_plan_assignment_repository.dart'; // Verifica nombre de archivo
 
 // --- Importa tus Providers (ChangeNotifiers) ---
 import 'providers/auth_provider.dart';
-import 'providers/training_plan_provider.dart'; // Importar nuevo provider
+import 'providers/training_plan_provider.dart';
+import 'providers/user_provider.dart'; // Asegúrate de importar UserProvider
 
 // --- Importa tu Wrapper de Autenticación ---
 import 'auth_wrapper.dart'; // El widget que decide entre AuthView y HomeView
 // --- Fin Imports ---
 
+// Punto de entrada principal de la aplicación Dart/Flutter
 void main() async {
-  // Necesario para asegurar que Flutter esté listo antes de usar plugins
+  // Necesario para asegurar que los bindings de Flutter estén listos
+  // antes de llamar a código nativo o asíncrono como Firebase.initializeApp
   WidgetsFlutterBinding.ensureInitialized();
-  // Inicializa Firebase
+
+  // Inicializa Firebase usando las opciones específicas de la plataforma
+  // generadas por FlutterFire CLI.
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  // Inicia la aplicación
+
+  // Inicia la aplicación Flutter ejecutando el widget principal MyApp.
   runApp(const MyApp());
 }
 
+// Widget raíz de la aplicación.
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // MultiProvider para inyectar/proporcionar los servicios y estados.
+    // MultiProvider envuelve toda la aplicación para hacer disponibles los
+    // servicios (repositorios) y estados (providers) globalmente.
     return MultiProvider(
       providers: [
-        // --- Proveedores de Servicios (Repositorios) ---
-        // Se proveen las implementaciones, pero se tipan con la interfaz.
+        // --- 1. Proveedores de Repositorios (Capa de Datos) ---
+        // Se proveen las implementaciones concretas.
 
-        // 1. Repositorio de Autenticación
-        Provider<AuthRepositoryBase>(
-          create: (_) => FirebaseAuthRepository(),
-        ),
+        Provider<AuthRepositoryBase>( create: (_) => FirebaseAuthRepository()),
+        Provider<UserRepositoryBase>( create: (_) => FirestoreUserRepository()),
+        Provider<TrainingPlanRepositoryBase>( create: (_) => FirestoreTrainingPlanRepository()),
+        Provider<PlanAssignmentRepositoryBase>( create: (_) => FirestorePlanAssignmentRepository()),
 
-        // 2. Repositorio de Datos de Usuario (Firestore)
-        Provider<UserRepositoryBase>(
-          create: (_) => FirestoreUserRepository(),
-        ),
+        // --- 2. Proveedores de Streams y Estado (Lógica de Negocio/UI) ---
+        // Pueden depender de los repositorios definidos arriba.
 
-        // 3. Repositorio de Planes de Entrenamiento (Firestore)
-        Provider<TrainingPlanRepositoryBase>(
-          create: (_) => FirestoreTrainingPlanRepository(),
-        ),
-
-
-        // --- Proveedores de Estado y Streams ---
-
-        // 4. StreamProvider para el estado de autenticación (User?)
-        //    Usa 'create' para leer de forma segura el AuthRepositoryBase.
+        // StreamProvider para el estado de autenticación global (User?)
         StreamProvider<User?>(
           create: (context) => context.read<AuthRepositoryBase>().authStateChanges,
-          initialData: null, // Valor inicial mientras conecta
-           catchError: (context, err) { // Manejo de errores
+          initialData: null,
+           catchError: (context, err) {
               print('>>> ERROR en StreamProvider<User?>: $err');
               return null;
            },
         ),
 
-        // 5. ChangeNotifierProxyProvider2 para el AuthProvider (ViewModel de Auth)
-        //    Depende de AuthRepositoryBase y UserRepositoryBase.
+        // ChangeNotifierProxyProvider2 para AuthProvider
+        // Depende de AuthRepositoryBase y UserRepositoryBase.
         ChangeNotifierProxyProvider2<AuthRepositoryBase, UserRepositoryBase, AuthProvider>(
           create: (context) => AuthProvider(
               context.read<AuthRepositoryBase>(),
@@ -87,32 +86,40 @@ class MyApp extends StatelessWidget {
               previousAuthProvider ?? AuthProvider(authRepo, userRepo),
         ),
 
-        // 6. ChangeNotifierProxyProvider2 para el TrainingPlanProvider
-        //    Depende de AuthRepositoryBase y TrainingPlanRepositoryBase.
-        ChangeNotifierProxyProvider2<AuthRepositoryBase, TrainingPlanRepositoryBase, TrainingPlanProvider>(
-           // El orden en create debe coincidir con el constructor de TrainingPlanProvider
-           create: (context) => TrainingPlanProvider(
-             context.read<TrainingPlanRepositoryBase>(), // planRepo
-             context.read<AuthRepositoryBase>(),      // authRepo
-           ),
-           // El orden en update es (context, T dependency1, T2 dependency2, R? previous)
-           update: (context, authRepo, planRepo, previousPlanProvider) =>
-               previousPlanProvider ?? TrainingPlanProvider(planRepo, authRepo),
+        // ChangeNotifierProxyProvider3 para TrainingPlanProvider
+        // Depende de AuthRepo(T), PlanRepo(T2), y AssignmentRepo(T3).
+        ChangeNotifierProxyProvider3<AuthRepositoryBase, TrainingPlanRepositoryBase, PlanAssignmentRepositoryBase, TrainingPlanProvider>(
+          create: (context) => TrainingPlanProvider(
+            context.read<TrainingPlanRepositoryBase>(),    // planRepo
+            context.read<AuthRepositoryBase>(),         // authRepo
+            context.read<PlanAssignmentRepositoryBase>(), // assignmentRepo
+          ),
+          update: (context, authRepo, planRepo, assignmentRepo, previousPlanProvider) =>
+              previousPlanProvider ?? TrainingPlanProvider(planRepo, authRepo, assignmentRepo),
+        ),
+
+         // ChangeNotifierProxyProvider para UserProvider
+         // Depende solo de UserRepositoryBase (T).
+        ChangeNotifierProxyProvider<UserRepositoryBase, UserProvider>(
+           create: (context) => UserProvider(context.read<UserRepositoryBase>()),
+           update: (context, userRepo, previousUserProvider) =>
+              previousUserProvider ?? UserProvider(userRepo),
         ),
 
         // --- Otros providers globales irían aquí ---
 
       ],
-      // El widget hijo principal del MultiProvider es MaterialApp.
+      // El widget hijo es MaterialApp, que define la estructura visual base.
       child: MaterialApp(
-        title: 'Voley App',
+        title: 'Voley App', // Título de la aplicación
         theme: ThemeData(
+          // Tema visual
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
         ),
-        // AuthWrapper decide qué mostrar basado en el StreamProvider<User?>
-        home: const AuthWrapper(),
-        debugShowCheckedModeBanner: false,
+        // Punto de entrada visual después de los providers.
+        home: const AuthWrapper(), // AuthWrapper decide qué mostrar
+        debugShowCheckedModeBanner: false, // Quita el banner "DEBUG"
       ),
     );
   }
