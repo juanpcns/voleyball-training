@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "802250925697",
+    "project_id": "voleyballtraining",
+    "storage_bucket": "voleyballtraining.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:802250925697:android:b86f9f12da42985bea0f80",
+        "android_client_info": {
+          "package_name": "com.example.voleyballtraining"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAHjxIXsH86bf5AeeBNvjJyApZ67lY1EyM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

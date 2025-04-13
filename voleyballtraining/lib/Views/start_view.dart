@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../Styles/templates/container_default.dart';
-import '../Styles/templates/home_view.dart';
-import '../Styles/tipography/text_styles.dart';
-import '../Styles/buttons/button_styles.dart';
+import 'Styles/templates/container_default.dart';
+import 'Styles/templates/home_view.dart';
+import 'Styles/tipography/text_styles.dart';
+import 'Styles/buttons/button_styles.dart';
 import 'create_user.dart';
 
 class StartView extends StatelessWidget {
