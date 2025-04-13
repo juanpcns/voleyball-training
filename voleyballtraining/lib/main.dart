@@ -1,4 +1,4 @@
-// lib/main.dart (Versión Final con Todos los Providers Correctos)
+// lib/main.dart (Versión Completa - Prueba D: Usando StreamProvider con create)
 
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -39,33 +39,51 @@ class MyApp extends StatelessWidget {
       providers: [
         // --- Proveedores de Servicios (Repositorios) ---
 
-        // 1. Repositorio de Autenticación (Base)
+        // 1. Repositorio de Autenticación
         Provider<AuthRepositoryBase>(
           create: (_) => FirebaseAuthRepository(),
         ),
 
-        // 2. Repositorio de Datos de Usuario (Base)
+        // 2. Repositorio de Datos de Usuario (Firestore)
         Provider<UserRepositoryBase>(
           create: (_) => FirestoreUserRepository(),
         ),
 
         // --- Proveedores de Estado y Streams ---
 
-        // 3. ProxyProvider para el Stream de Estado de Autenticación (User?)
-        //    Depende de AuthRepositoryBase. Provee el Stream<User?>.
-        ProxyProvider<AuthRepositoryBase, Stream<User?>>(
-          update: (context, authRepo, previousStream) => authRepo.authStateChanges,
+        // 3. StreamProvider para el estado de autenticación (User?)
+        //    *** Usando el constructor 'create' ***
+        //    El 'context' que recibe 'create' puede leer de forma segura
+        //    los providers definidos anteriormente en esta lista.
+        StreamProvider<User?>(
+          create: (context) {
+             print("--- Creando StreamProvider<User?> usando create ---");
+             // Leemos el repositorio que ya fue provisto arriba
+             final stream = context.read<AuthRepositoryBase>().authStateChanges;
+
+             // (Opcional pero útil para depurar) Escuchamos el stream base
+             stream.listen((user) {
+               print(">>> DEBUG main.dart (StreamProvider): Stream emitió -> UID: ${user?.uid ?? 'NULL'} <<<");
+             });
+             return stream; // Devolvemos el stream para que StreamProvider lo maneje
+          },
+          // Valor inicial mientras el stream emite el primer valor
+          initialData: null,
+          // Manejo de errores que puedan ocurrir en el stream
+           catchError: (context, err) {
+              print('>>> ERROR en StreamProvider<User?>: $err');
+              // Si hay error en el stream de auth, asumimos que no hay usuario
+              return null;
+           },
         ),
 
         // 4. ChangeNotifierProxyProvider2 para el AuthProvider (ViewModel)
-        //    Depende de AuthRepositoryBase y UserRepositoryBase. Provee AuthProvider.
+        //    (Se mantiene igual que en la corrección anterior)
         ChangeNotifierProxyProvider2<AuthRepositoryBase, UserRepositoryBase, AuthProvider>(
-          // Crea la instancia inicial leyendo las dependencias ya provistas.
           create: (context) => AuthProvider(
               context.read<AuthRepositoryBase>(),
               context.read<UserRepositoryBase>(),
           ),
-          // Actualiza (o simplemente devuelve la existente) cuando las dependencias cambian.
           update: (context, authRepo, userRepo, previousAuthProvider) =>
               previousAuthProvider ?? AuthProvider(authRepo, userRepo),
         ),
@@ -73,17 +91,16 @@ class MyApp extends StatelessWidget {
         // --- Otros providers globales irían aquí ---
       ],
 
-      // El hijo del MultiProvider es MaterialApp.
+      // El widget hijo principal del MultiProvider es MaterialApp.
       child: MaterialApp(
-        title: 'Voley App', // Título de la aplicación
+        title: 'Voley App',
         theme: ThemeData(
-          // Tema visual
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple), // Cambia el color si quieres
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
         ),
-        // El widget 'home' es el AuthWrapper, que manejará la navegación inicial.
+        // AuthWrapper sigue siendo el punto de entrada visual.
+        // Debería reaccionar a los cambios emitidos por el StreamProvider<User?>.
         home: const AuthWrapper(),
-        // Quita el banner "DEBUG".
         debugShowCheckedModeBanner: false,
       ),
     );

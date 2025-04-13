@@ -1,17 +1,21 @@
+// lib/views/create_user_view.dart
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; // Para Timestamp
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:voleyballtraining/providers/auth_provider.dart'; // Ajusta la ruta
-// Ajusta las rutas a tus estilos y widgets personalizados
-import 'package:voleyballtraining/Views/Styles/placeholders/placeholder_default.dart';
+
+// --- Importa tus estilos y widgets personalizados ---
+// import 'package:voleyballtraining/Views/Styles/placeholders/placeholder_default.dart';
 import 'package:voleyballtraining/Views/Styles/templates/container_default.dart';
-import 'package:voleyballtraining/Views/Styles/templates/home_view.dart';
+import 'package:voleyballtraining/Views/Styles/templates/home_view.dart'; // Para el fondo
 import 'package:voleyballtraining/Views/Styles/tipography/text_styles.dart';
 import 'package:voleyballtraining/Views/Styles/buttons/button_styles.dart';
+// --- Fin Imports ---
 
-// Asegúrate que el nombre de la clase coincida con cómo la llamas en AuthView
 class CreateUser extends StatefulWidget {
-  const CreateUser({super.key});
+  final VoidCallback? onGoToLogin;
+  const CreateUser({super.key, this.onGoToLogin});
 
   @override
   State<CreateUser> createState() => _CreateUserState();
@@ -22,8 +26,8 @@ class _CreateUserState extends State<CreateUser> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _fullNameController = TextEditingController();
-  // final _idNumberController = TextEditingController(); // Descomenta si añades el campo
-  // final _phoneController = TextEditingController(); // Descomenta si añades el campo
+  // final _idNumberController = TextEditingController();
+  // final _phoneController = TextEditingController();
 
   String? _selectedRole;
   final List<String> _roles = ['Jugador', 'Entrenador'];
@@ -39,63 +43,53 @@ class _CreateUserState extends State<CreateUser> {
   }
 
   Future<void> _submitForm() async {
-    print("--- Botón 'Crear Usuario' presionado ---"); // DEBUG
-
     final isValid = _formKey.currentState?.validate() ?? false;
-    print("--- Resultado de validación del formulario: $isValid ---"); // DEBUG
-    if (!isValid) {
-       print("--- Validación fallida. No se continúa. ---"); // DEBUG
-      return;
-    }
+    if (!isValid) return;
     _formKey.currentState!.save();
-     print("--- Formulario validado. Rol: $_selectedRole ---"); // DEBUG
 
     final authProvider = context.read<AuthProvider>();
-     print("--- Llamando a authProvider.signUpUser... ---"); // DEBUG
-
     final success = await authProvider.signUpUser(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
         fullName: _fullNameController.text.trim(),
-        role: _selectedRole!, // La validación asegura que no es null
-        // idNumber: _idNumberController.text.trim(), // Pasa los opcionales si los tienes
-        // phoneNumber: _phoneController.text.trim(),
-        // dateOfBirth: ... , // Necesitarías un DatePicker
+        role: _selectedRole!,
+        // Pasa los opcionales si los tienes
         );
 
-     print("--- Resultado de signUpUser: $success ---"); // DEBUG
     if (!success && mounted) {
-       print("--- Error reportado por AuthProvider: ${authProvider.errorMessage} ---"); // DEBUG
        ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(authProvider.errorMessage ?? 'Ocurrió un error desconocido.'),
+            content: Text(authProvider.errorMessage ?? 'Ocurrió un error al registrar.'),
             backgroundColor: Colors.red,
           ),
         );
-    } else if (success) {
-        print("--- Registro exitoso. AuthWrapper debería redirigir. ---"); // DEBUG
     }
   }
 
 
   @override
   Widget build(BuildContext context) {
-    final authProvider = context.watch<AuthProvider>(); // Escucha cambios
+    final authProvider = context.watch<AuthProvider>();
+
+    // --- Define los estilos ---
+    // *** ¡¡REEMPLAZA TextStyles.title().color con tu color naranja real!! ***
+    final Color naranjaTitulo = TextStyles.title().color ?? Colors.orange;
+
+    final inputTextStyle = const TextStyle(color: Colors.white); // <-- Texto de entrada BLANCO
+    final labelTextStyle = TextStyle(color: naranjaTitulo); // <-- Label NARANJA
+    // --- Fin definición de estilos ---
 
     return Scaffold(
-      // Evita que el fondo se redimensione cuando aparece el teclado
       resizeToAvoidBottomInset: false,
       body: Stack(
         children: [
-          // Considera si realmente quieres HomeView como fondo aquí,
-          // podría ser simplemente un color o una imagen estática.
           const HomeView(), // Fondo
-          ContainerDefault( // Contenedor semi-transparente
+          ContainerDefault(
             child: GestureDetector(
-               onTap: () => FocusScope.of(context).unfocus(), // Ocultar teclado al tocar fuera
-               child: SingleChildScrollView( // Permite scroll
+               onTap: () => FocusScope.of(context).unfocus(),
+               child: SingleChildScrollView(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 40), // Más padding
+                  padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 40),
                   child: Form(
                     key: _formKey,
                     child: Column(
@@ -110,73 +104,90 @@ class _CreateUserState extends State<CreateUser> {
                         // --- Nombre Completo ---
                          TextFormField(
                           controller: _fullNameController,
-                          decoration: const InputDecoration(labelText: 'Nombre Completo'), // Usar InputDecoration estándar
+                          enabled: !authProvider.isLoading,
+                          style: inputTextStyle, // <-- Aplicado estilo blanco
+                          decoration: InputDecoration(
+                            labelText: 'Nombre Completo',
+                            labelStyle: labelTextStyle, // <-- Aplicado estilo naranja
+                          ),
                           keyboardType: TextInputType.name,
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) return 'Ingresa tu nombre completo';
-                            return null;
-                          },
+                          textCapitalization: TextCapitalization.words,
+                          validator: (value) { if(value == null || value.trim().isEmpty) return 'Ingresa nombre'; return null;},
                         ),
                         const SizedBox(height: 15),
 
                         // --- Email ---
                         TextFormField(
                           controller: _emailController,
-                          decoration: const InputDecoration(labelText: 'Correo Electrónico'),
+                          enabled: !authProvider.isLoading,
+                          style: inputTextStyle, // <-- Aplicado estilo blanco
+                          decoration: InputDecoration(
+                            labelText: 'Correo Electrónico',
+                            labelStyle: labelTextStyle, // <-- Aplicado estilo naranja
+                          ),
                           keyboardType: TextInputType.emailAddress,
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) return 'Ingresa tu correo';
-                            if (!RegExp(r'\S+@\S+\.\S+').hasMatch(value)) return 'Correo inválido';
-                            return null;
-                          },
+                          validator: (value) { if(value == null || value.trim().isEmpty) return 'Ingresa correo'; if(!RegExp(r'\S+@\S+\.\S+').hasMatch(value)) return 'Correo inválido'; return null;},
                         ),
                         const SizedBox(height: 15),
 
                         // --- Contraseña ---
                         TextFormField(
                           controller: _passwordController,
-                          decoration: const InputDecoration(labelText: 'Contraseña'),
+                          enabled: !authProvider.isLoading,
+                          style: inputTextStyle, // <-- Aplicado estilo blanco
+                          decoration: InputDecoration(
+                            labelText: 'Contraseña',
+                            labelStyle: labelTextStyle, // <-- Aplicado estilo naranja
+                          ),
                           obscureText: true,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) return 'Ingresa tu contraseña';
-                            if (value.length < 6) return 'Mínimo 6 caracteres';
-                            return null;
-                          },
+                          validator: (value) { if(value == null || value.isEmpty) return 'Ingresa contraseña'; if(value.length < 6) return 'Mínimo 6 caracteres'; return null;},
                         ),
                         const SizedBox(height: 15),
 
                          // --- Rol ---
                         DropdownButtonFormField<String>(
                           value: _selectedRole,
-                          decoration: const InputDecoration(labelText: 'Selecciona tu Rol'),
-                          items: _roles.map((String role) => DropdownMenuItem<String>(value: role, child: Text(role))).toList(),
-                          onChanged: (String? newValue) => setState(() => _selectedRole = newValue),
+                          style: inputTextStyle, // <-- Texto seleccionado blanco
+                          dropdownColor: Colors.grey[800],
+                          decoration: InputDecoration(
+                            labelText: 'Selecciona tu Rol',
+                            labelStyle: labelTextStyle, // <-- Aplicado estilo naranja
+                          ),
+                          items: _roles.map((String role) => DropdownMenuItem<String>(
+                            value: role,
+                            // Texto de los items en el menú desplegable
+                            child: Text(role, style: const TextStyle(color: Colors.white)), // Items en blanco
+                          )).toList(),
+                          onChanged: authProvider.isLoading ? null : (String? newValue) {
+                            setState(() => _selectedRole = newValue);
+                          },
                           validator: (value) => value == null || value.isEmpty ? 'Selecciona un rol' : null,
                         ),
                         const SizedBox(height: 30),
 
                         // --- Indicador de Carga / Botón ---
-                        // Muestra indicador si está cargando, si no, muestra el botón
                         authProvider.isLoading
-                         ? const Center(child: Padding(padding: EdgeInsets.all(16.0), child: CircularProgressIndicator())) // Añadido Padding
+                         ? const Center(child: Padding(padding: EdgeInsets.all(16.0), child: CircularProgressIndicator()))
                          : ButtonDefault(
                             text: 'Crear Usuario',
-                            // Deshabilita el botón si está cargando
                             onPressed: authProvider.isLoading ? null : _submitForm,
                             padding: const EdgeInsets.symmetric(horizontal: 46, vertical: 20),
                            ),
-
-                        // (Opcional) Espacio para link a Login
                         const SizedBox(height: 20),
-                        // TextButton(onPressed: () { /* TODO: Navegar a Login */ }, child: Text('¿Ya tienes cuenta? Inicia Sesión'))
+
+                        // --- Botón/Texto para ir a Login ---
+                        TextButton(
+                          onPressed: authProvider.isLoading ? null : widget.onGoToLogin,
+                          child: const Text('¿Ya tienes cuenta? Inicia Sesión'),
+                        ),
                       ],
                     ),
                   ),
                 ),
                ),
              ),
-          ),
-        ]
+          )
+        ],
       ),
     );
   }

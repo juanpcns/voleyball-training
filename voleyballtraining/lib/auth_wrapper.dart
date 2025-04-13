@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart' show User;
-
 import 'views/auth_view.dart';
 import 'views/home_view.dart';
 
@@ -11,20 +10,19 @@ class AuthWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print("--- Construyendo AuthWrapper ---"); // <-- AÑADIR
+    print("--- Construyendo AuthWrapper ---"); // <-- ¿Aparece después del login?
 
-    // Leemos el usuario del StreamProvider
     final firebaseUser = context.watch<User?>();
-    print("--- AuthWrapper: Valor de firebaseUser: ${firebaseUser?.uid ?? 'null'} ---"); // <-- AÑADIR
+    // <-- ¿Qué valor tiene firebaseUser DESPUÉS del login exitoso?
+    print("--- AuthWrapper: Valor de firebaseUser: ${firebaseUser?.uid ?? 'null'} ---");
 
-    // Lógica de decisión
     if (firebaseUser != null) {
-      print("--- AuthWrapper: Usuario NO es null. Devolviendo HomeView. ---"); // <-- AÑADIR
-      // TODO: Asegúrate que HomeView no tenga errores de construcción
+      // <-- ¿Entra aquí después del login exitoso?
+      print("--- AuthWrapper: Usuario NO es null. Devolviendo HomeView. ---");
       return const HomeView();
     } else {
-      print("--- AuthWrapper: Usuario ES null. Devolviendo AuthView. ---"); // <-- AÑADIR
-      // TODO: Asegúrate que AuthView no tenga errores de construcción
+      // <-- ¿O sigue entrando aquí?
+      print("--- AuthWrapper: Usuario ES null. Devolviendo AuthView. ---");
       return const AuthView();
     }
   }
