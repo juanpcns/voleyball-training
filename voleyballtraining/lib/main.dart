@@ -100,27 +100,28 @@ class MyApp extends StatelessWidget {
 
           // --- Estilos de Texto Base ---
           // Mapea tus estilos personalizados a los roles semánticos del tema
-          textTheme: TextTheme(
-            // Mapeos de ejemplo (ajusta según el tamaño/peso real en tus estilos)
-            displayLarge: CustomTextStyles.h1White, // Usar variantes blancas
-            displayMedium: CustomTextStyles.h1White,
-            displaySmall: CustomTextStyles.h2White,
-            headlineLarge: CustomTextStyles.h2White,
-            headlineMedium: CustomTextStyles.h3White,
-            headlineSmall: CustomTextStyles.h3White, // O un estilo más pequeño blanco
-            titleLarge: CustomTextStyles.h3White,    // Títulos en AppBars, Dialogs
-            titleMedium: CustomTextStyles.bodyWhite, // Cuerpo blanco
-            titleSmall: CustomTextStyles.bodyWhite,
-            bodyLarge: CustomTextStyles.bodyWhite,   // Cuerpo de texto principal blanco
-            bodyMedium: CustomTextStyles.bodyWhite,  // Cuerpo de texto estándar blanco
-            bodySmall: CustomTextStyles.captionWhite,// Caption blanco
-            labelLarge: CustomTextStyles.button,    // Texto para botones (suele ser claro por defecto en botón primario)
-            labelMedium: CustomTextStyles.captionWhite,
-            labelSmall: CustomTextStyles.captionWhite,
-          ).apply( // Aplica colores base CLAROS por defecto para tema oscuro
-             bodyColor: AppColors.textLight,
-             displayColor: AppColors.textLight,
-          ),
+          // Aplicando el color naranja a los estilos de título/encabezado
+        textTheme: TextTheme(
+          // --- > Títulos/Encabezados en Naranja <---
+          displayLarge: CustomTextStyles.h1White.copyWith(color: AppColors.primary),
+          displayMedium: CustomTextStyles.h1White.copyWith(color: AppColors.primary),
+          displaySmall: CustomTextStyles.h2White.copyWith(color: AppColors.primary),
+          headlineLarge: CustomTextStyles.h2White.copyWith(color: AppColors.primary),
+          headlineMedium: CustomTextStyles.h3White.copyWith(color: AppColors.primary),
+          headlineSmall: CustomTextStyles.h3White.copyWith(color: AppColors.primary), // O un estilo más pequeño si lo tienes
+          titleLarge: CustomTextStyles.h3White.copyWith(color: AppColors.primary),    // Títulos en AppBars (si no se sobrescribe), Dialogs
+
+          // --- > Otros estilos mantienen color claro por defecto <---
+          titleMedium: CustomTextStyles.bodyWhite, // Cuerpo blanco (para títulos medianos/pequeños)
+          titleSmall: CustomTextStyles.bodyWhite,
+          bodyLarge: CustomTextStyles.bodyWhite,   // Cuerpo de texto principal blanco
+          bodyMedium: CustomTextStyles.bodyWhite,  // Cuerpo de texto estándar blanco
+          bodySmall: CustomTextStyles.captionWhite,// Caption blanco
+          labelLarge: CustomTextStyles.button,    // Texto para botones (suele ser claro por defecto)
+          labelMedium: CustomTextStyles.captionWhite,
+          labelSmall: CustomTextStyles.captionWhite,
+        ), // <--- Eliminamos el .apply() que establecía colores globales por defecto
+
 
           // --- Estilos de Componentes por Defecto ---
           appBarTheme: AppBarTheme(

@@ -1,84 +1,97 @@
 // lib/Views/Styles/templates/container_default.dart
 import 'package:flutter/material.dart';
 // Asegúrate que la ruta de importación sea correcta
-import 'package:voleyballtraining/Views/Styles/colors/app_colors.dart';
+import 'package:voleyballtraining/Views/Styles/colors/app_colors.dart'; // Necesitamos AppColors.primary
 
 /// Un widget [Container] reutilizable con estilo predeterminado para el tema oscuro.
 ///
-/// Aplica padding, margen, color de fondo ([AppColors.surfaceDark]),
-/// bordes redondeados y opcionalmente un borde sutil o una sombra.
-/// Ideal para crear 'cards' o secciones visualmente separadas en modo oscuro.
+/// Aplica padding al contenido, margen externo, bordes redondeados.
+/// SIEMPRE incluye la imagen 'hinata_container_default.png' como fondo,
+/// cubierta por una capa negra semi-transparente.
+/// SIEMPRE tiene un borde naranja y una sombra/resplandor naranja EXTERIOR.
 class ContainerDefault extends StatelessWidget {
   /// El widget hijo que se mostrará dentro del contenedor.
   final Widget child;
 
-  /// El padding interno del contenedor. Por defecto es 16.0 en todas las direcciones.
+  /// El padding aplicado AL CONTENIDO (child) dentro del contenedor.
   final EdgeInsetsGeometry padding;
 
-  /// El margen externo del contenedor. Por defecto es horizontal 12.0 y vertical 8.0.
+  /// El margen externo del contenedor.
   final EdgeInsetsGeometry margin;
 
-  /// El radio de los bordes redondeados. Por defecto es 12.0.
+  /// El radio de los bordes redondeados (aplica al contenedor y corta el contenido).
   final double borderRadius;
 
-  /// Si se debe mostrar una sombra sutil (menos común en tema oscuro). Por defecto es false.
-  final bool showShadow;
+  // --- Parámetros de Imagen y Overlay ---
+  /// Cómo debe ajustarse la imagen de Hinata dentro del contenedor.
+  final BoxFit? hinataImageFit;
+  /// Opacidad de la capa negra sobre la imagen (0.0 = transparente, 1.0 = opaco).
+  final double overlayOpacity;
+  // --- Fin Parámetros Imagen y Overlay ---
 
-  /// Si se debe mostrar un borde sutil (más común en tema oscuro para separar). Por defecto es true.
-  final bool showBorder;
-
-  /// Color del borde si [showBorder] es true. Por defecto es [AppColors.divider].
-  final Color borderColor;
-
-  /// Ancho del borde si [showBorder] es true. Por defecto es 0.5.
-  final double borderWidth;
-
-  /// Color de fondo personalizado (opcional, por defecto usa AppColors.surfaceDark).
-  final Color? backgroundColor;
-
+  // --- Constructor Simplificado ---
   const ContainerDefault({
     super.key,
     required this.child,
-    this.padding = const EdgeInsets.all(16.0), // Usa const
-    this.margin = const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0), // Usa const
+    this.padding = const EdgeInsets.all(16.0),
+    this.margin = const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
     this.borderRadius = 12.0,
-    this.showShadow = false, // Sombra desactivada por defecto en oscuro
-    this.showBorder = true,  // Borde activado por defecto en oscuro
-    this.borderColor = AppColors.divider, // Color de divisor oscuro desde AppColors
-    this.borderWidth = 0.5, // Borde muy sutil
-    this.backgroundColor, // Permite sobrescribir el color de fondo
+    this.hinataImageFit = BoxFit.cover,
+    this.overlayOpacity = 0.5,
   });
+  // --- Fin Constructor ---
 
   @override
   Widget build(BuildContext context) {
-    // Determina el color de fondo a usar
-    final Color effectiveBackgroundColor = backgroundColor ?? AppColors.surfaceDark;
+    // Validar opacidad
+    final double validOpacity = overlayOpacity.clamp(0.0, 1.0);
 
-    return Container(
-      padding: padding,
+    return Container( // Contenedor exterior para margen, forma, borde, sombra, clip
+      clipBehavior: Clip.antiAlias,
       margin: margin,
       decoration: BoxDecoration(
-        // Usa el color de fondo efectivo (personalizado o surfaceDark)
-        color: effectiveBackgroundColor,
         borderRadius: BorderRadius.circular(borderRadius),
-        border: showBorder
-            ? Border.all(
-                color: borderColor, // Color del borde desde AppColors
-                width: borderWidth,
-              )
-            : null,
-        boxShadow: showShadow
-            ? [
-                BoxShadow(
-                  // Sombra muy sutil si se activa para modo oscuro
-                  color: Colors.black.withOpacity(0.2),
-                  blurRadius: 6.0,
-                  offset: const Offset(0, 2), // Sombra más corta
-                ),
-              ]
-            : null,
+
+        // --- > BORDE NARANJA FIJO <---
+        border: Border.all(
+          color: AppColors.primary, // Color Naranja Primario
+          width: 1.5,             // Ancho del borde
+        ),
+        // --- > SOMBRA/RESPLANDOR NARANJA EXTERIOR <---
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withOpacity(0.1), // Naranja con opacidad (ajustada)
+             // --- > Ajustes para efecto exterior <---
+            blurRadius: 10.0,        // Reducimos un poco el blur
+            spreadRadius: 20.0,       // AUMENTAMOS el spread para empujar hacia afuera
+            offset: Offset.zero,   // Sombra centrada
+          ),
+        ],
       ),
-      child: child,
+      // El hijo del contenedor exterior es el Stack con las capas de fondo y contenido
+      child: Stack(
+        fit: StackFit.passthrough,
+        children: [
+          // --- Capa 1: Imagen de Hinata ---
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/hinata_container_default.png',
+              fit: hinataImageFit,
+            ),
+          ),
+          // --- Capa 2: Overlay Negro Semi-Transparente ---
+          Positioned.fill(
+            child: Container(
+              color: Colors.black.withOpacity(validOpacity),
+            ),
+          ),
+          // --- Capa 3: Contenido Original (Child) con Padding ---
+          Padding(
+            padding: padding,
+            child: child,
+          ),
+        ],
+      ),
     );
   }
 }
