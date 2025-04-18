@@ -1,4 +1,4 @@
-// lib/views/plans/training_plans_view.dart (VERSIÓN FINAL CORREGIDA)
+// lib/views/plans/training_plans_view.dart
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -11,9 +11,14 @@ import '../../providers/user_provider.dart';
 import '../../models/plan_assignment_model.dart';
 
 // --- Importa Vistas ---
-import 'create_plan_view.dart';
+// import 'create_plan_view.dart'; // No se usa aquí
 import 'plan_detail_view.dart';
 
+// --- > Importaciones de Estilos <---
+import 'package:voleyballtraining/Views/Styles/colors/app_colors.dart';
+// --- > IMPORTAR EL CONTENEDOR <---
+import 'package:voleyballtraining/Views/Styles/templates/container_default.dart';
+// import 'package:voleyballtraining/Views/Styles/buttons/button_styles.dart'; // No se usan botones grandes aquí
 
 class TrainingPlansView extends StatefulWidget {
   final UserModel userModel;
@@ -28,7 +33,6 @@ class _TrainingPlansViewState extends State<TrainingPlansView> {
   @override
   void initState() {
     super.initState();
-    // Cargar datos apropiados al iniciar la vista
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       final planProvider = context.read<TrainingPlanProvider>();
@@ -41,14 +45,16 @@ class _TrainingPlansViewState extends State<TrainingPlansView> {
     });
   }
 
-  /// Muestra diálogo para seleccionar jugador (para Coach)
   Future<void> _showPlayerSelectionDialog(BuildContext context, String planId, String planName) async {
+     final theme = Theme.of(context);
+     final textTheme = theme.textTheme;
+     final colorScheme = theme.colorScheme;
      final userProvider = context.read<UserProvider>();
      final List<UserModel> players = userProvider.playerUsers;
 
      if (players.isEmpty && mounted) {
        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No hay jugadores registrados.'), backgroundColor: Colors.orange)
+          SnackBar( content: const Text('No hay jugadores registrados.'), backgroundColor: AppColors.warningDark)
        );
        return;
      }
@@ -56,26 +62,35 @@ class _TrainingPlansViewState extends State<TrainingPlansView> {
      final String? selectedPlayerId = await showDialog<String>(
        context: context,
        builder: (BuildContext dialogContext) {
+         // ... (Código del AlertDialog sin cambios aquí, ya estaba estilizado) ...
          return AlertDialog(
-           title: Text('Asignar plan:\n"${planName}"', style: const TextStyle(fontSize: 18)),
-           contentPadding: const EdgeInsets.only(top: 10.0, left: 0, right: 0, bottom: 0),
+           backgroundColor: AppColors.surfaceDark,
+           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+           title: Text('Asignar plan:\n"${planName}"', style: textTheme.titleLarge),
+           contentPadding: EdgeInsets.zero,
            content: Container(
              width: double.maxFinite,
              constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.5),
-             child: ListView.builder(
+             child: ListView.separated(
                shrinkWrap: true,
                itemCount: players.length,
                itemBuilder: (listContext, index) {
                  final player = players[index];
                  return ListTile(
-                   title: Text(player.fullName),
-                   subtitle: Text(player.email),
+                   title: Text(player.fullName, style: textTheme.bodyLarge),
+                   subtitle: Text(player.email, style: textTheme.bodyMedium?.copyWith(color: AppColors.textGray)),
                    onTap: () => Navigator.pop(dialogContext, player.userId),
+                   splashColor: AppColors.primary.withOpacity(0.1),
                  );
                },
+               separatorBuilder: (context, index) => Divider(
+                   height: 1, thickness: 1, color: AppColors.divider.withOpacity(0.5)),
              ),
            ),
-           actions: <Widget>[ TextButton(child: const Text('Cancelar'), onPressed: () => Navigator.pop(dialogContext)), ],
+           actions: <Widget>[
+             TextButton(child: const Text('Cancelar'), onPressed: () => Navigator.pop(dialogContext)),
+           ],
+           actionsPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
          );
        },
      );
@@ -84,124 +99,179 @@ class _TrainingPlansViewState extends State<TrainingPlansView> {
         final planProvider = context.read<TrainingPlanProvider>();
         final success = await planProvider.assignPlanToPlayer(planId: planId, playerId: selectedPlayerId, planName: planName);
         if (mounted) {
-           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(success ? '¡Plan asignado!' : planProvider.errorMessage ?? 'Error al asignar.'), backgroundColor: success ? Colors.green : Colors.red));
+           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+             content: Text(success ? '¡Plan asignado!' : planProvider.errorMessage ?? 'Error al asignar.'),
+             backgroundColor: success ? AppColors.successDark : colorScheme.error
+          ));
         }
      }
   }
 
   @override
   Widget build(BuildContext context) {
-    final bool isCoach = widget.userModel.role == 'Entrenador';
+    // Quitamos el Scaffold de aquí
     final planProvider = context.watch<TrainingPlanProvider>();
-
-    return Scaffold(
-      body: _buildBody(planProvider, isCoach, context),
-      floatingActionButton: isCoach
-          ? FloatingActionButton(
-              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CreatePlanView())), // Correcto
-              tooltip: 'Crear Nuevo Plan',
-              child: const Icon(Icons.add),
-            )
-          : null,
-    );
+    final bool isCoach = widget.userModel.role == 'Entrenador';
+    // Devolvemos directamente el contenido del cuerpo
+    return _buildBody(planProvider, isCoach, context);
   }
 
+  // El cuerpo de la vista
   Widget _buildBody(TrainingPlanProvider planProvider, bool isCoach, BuildContext context) {
+     final theme = Theme.of(context);
+     final textTheme = theme.textTheme;
+     final colorScheme = theme.colorScheme;
+
+    // --- Estado de Carga ---
+    if ((isCoach && planProvider.isLoadingCoachPlans) || (!isCoach && planProvider.isLoadingPlayerAssignments)) {
+      // --- > Envuelto en ContainerDefault <---
+      return ContainerDefault(
+          margin: const EdgeInsets.all(16), // Margen para separar de bordes
+          child: Center(child: CircularProgressIndicator(color: colorScheme.primary)),
+      );
+    }
+
+    // --- Estado de Error ---
+    final String? error = isCoach ? planProvider.coachPlansError : planProvider.playerAssignmentsError;
+    if (error != null) {
+       // --- > Envuelto en ContainerDefault <---
+       return ContainerDefault(
+          margin: const EdgeInsets.all(16),
+          child: Center(child: Padding(
+            padding: const EdgeInsets.all(16.0), // Padding interno del texto
+            child: Text('Error: $error', style: textTheme.bodyLarge?.copyWith(color: colorScheme.error), textAlign: TextAlign.center)
+          )),
+       );
+    }
 
     // --- Lógica para Entrenador ---
     if (isCoach) {
-       if (planProvider.isLoadingCoachPlans) return const Center(child: CircularProgressIndicator());
-       if (planProvider.coachPlansError != null) return Center(child: Padding(padding: const EdgeInsets.all(16.0), child: Text('Error: ${planProvider.coachPlansError}', style: const TextStyle(color: Colors.red))));
-       if (planProvider.coachPlans.isEmpty) return const Center(child: Padding(padding: EdgeInsets.all(16.0), child: Text('Aún no has creado ningún plan.\nUsa el botón (+) para empezar!', textAlign: TextAlign.center)));
+       if (planProvider.coachPlans.isEmpty) {
+         // --- > Envuelto en ContainerDefault <---
+         return ContainerDefault(
+            margin: const EdgeInsets.all(16),
+            child: Center(child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                'Aún no has creado ningún plan.\nUsa el botón (+) para empezar!',
+                style: textTheme.bodyLarge?.copyWith(color: AppColors.textGray),
+                textAlign: TextAlign.center,
+              )
+            )),
+         );
+       }
 
-       return ListView.builder(
-           itemCount: planProvider.coachPlans.length,
-           itemBuilder: (context, index) {
-             final plan = planProvider.coachPlans[index];
-             return Card(
-               margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-               child: ListTile(
-                 leading: const Icon(Icons.fitness_center),
-                 title: Text(plan.planName, style: const TextStyle(fontWeight: FontWeight.bold)),
-                 subtitle: Text('Ejercicios: ${plan.exercises.length} - Creado: ${DateFormat('dd/MM/yyyy').format(plan.createdAt.toDate())}'),
-                 trailing: IconButton(
-                       icon: const Icon(Icons.assignment_ind_outlined, color: Colors.blue),
-                       tooltip: 'Asignar Plan a Jugador',
-                       onPressed: () => _showPlayerSelectionDialog(context, plan.id, plan.planName), // Correcto
+       // --- > ListView envuelto en ContainerDefault <---
+       return ContainerDefault(
+          // Quitamos el padding interno del ContainerDefault para la lista
+          padding: EdgeInsets.zero,
+          // Ajustamos margen si es necesario (o quitamos si queremos que llene más espacio)
+          margin: const EdgeInsets.only(left: 8, right: 8, top: 8, bottom: 80), // Margen exterior y espacio para FAB
+          child: ListView.builder(
+             // El padding interno lo manejan los Card o el ListView si es necesario
+             // padding: const EdgeInsets.only(top: 8.0, bottom: 8.0), // Podemos añadir padding aquí
+             itemCount: planProvider.coachPlans.length,
+             itemBuilder: (context, index) {
+               final plan = planProvider.coachPlans[index];
+               // Usamos Card para cada elemento, hereda estilo del CardTheme
+               return Card(
+                 // El margen del Card crea separación entre elementos
+                 margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
+                 child: ListTile(
+                   leading: Icon(Icons.fitness_center, color: colorScheme.primary.withOpacity(0.8)),
+                   title: Text(plan.planName, style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                   subtitle: Text(
+                       'Ejercicios: ${plan.exercises.length} - Creado: ${DateFormat('dd/MM/yyyy').format(plan.createdAt.toDate())}',
+                       style: textTheme.bodySmall,
                     ),
-                 onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => PlanDetailView(planId: plan.id))), // Correcto
-               ),
-             );
-           },
+                   trailing: IconButton(
+                       icon: Icon(Icons.assignment_ind_outlined, color: colorScheme.secondary),
+                       tooltip: 'Asignar Plan a Jugador',
+                       onPressed: () => _showPlayerSelectionDialog(context, plan.id, plan.planName),
+                   ),
+                   onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => PlanDetailView(planId: plan.id))),
+                   splashColor: AppColors.primary.withOpacity(0.1),
+                 ),
+               );
+             },
+          ),
        );
     }
     // --- Lógica para Jugador ---
-    else { // Es Jugador
-      if (planProvider.isLoadingPlayerAssignments) return const Center(child: CircularProgressIndicator());
-      if (planProvider.playerAssignmentsError != null) return Center(child: Padding(padding: const EdgeInsets.all(16.0), child: Text('Error: ${planProvider.playerAssignmentsError}', style: const TextStyle(color: Colors.red))));
-      if (planProvider.playerAssignments.isEmpty) return const Center(child: Padding(padding: EdgeInsets.all(16.0), child: Text('No tienes planes asignados.')));
+    else {
+       if (planProvider.playerAssignments.isEmpty) {
+           // --- > Envuelto en ContainerDefault <---
+          return ContainerDefault(
+              margin: const EdgeInsets.all(16),
+              child: Center(child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text('No tienes planes asignados.', style: textTheme.bodyLarge?.copyWith(color: AppColors.textGray))
+             )),
+          );
+       }
 
-      return ListView.builder(
-         itemCount: planProvider.playerAssignments.length,
-         itemBuilder: (context, index) {
-            final assignment = planProvider.playerAssignments[index];
-
-            // --- SWITCH CORREGIDO Y COMPLETO ---
-            IconData statusIcon;
-            Color statusColor;
-            String statusText;
-            switch(assignment.status) {
-                case PlanAssignmentStatus.aceptado: statusIcon = Icons.check_circle; statusColor = Colors.green; statusText = "Aceptado"; break;
-                case PlanAssignmentStatus.rechazado: statusIcon = Icons.cancel; statusColor = Colors.red; statusText = "Rechazado"; break;
-                // Caso explícito para Pendiente (cubre el default también)
-                case PlanAssignmentStatus.pendiente:
-                default:
-                    statusIcon = Icons.pending_actions; statusColor = Colors.orange; statusText = "Pendiente"; break;
-            }
-            // --- FIN SWITCH CORREGIDO ---
+        // --- > ListView envuelto en ContainerDefault <---
+       return ContainerDefault(
+         padding: EdgeInsets.zero,
+         margin: const EdgeInsets.only(left: 8, right: 8, top: 8, bottom: 80), // Margen exterior y espacio para FAB/NavBar
+         child: ListView.builder(
+           // padding: const EdgeInsets.only(top: 8.0, bottom: 8.0), // Padding interno de la lista
+           itemCount: planProvider.playerAssignments.length,
+           itemBuilder: (context, index) {
+             final assignment = planProvider.playerAssignments[index];
+             IconData statusIcon; Color statusColor; String statusText;
+             switch(assignment.status) {
+               case PlanAssignmentStatus.aceptado: statusIcon = Icons.check_circle; statusColor = AppColors.successDark; statusText = "Aceptado"; break;
+               case PlanAssignmentStatus.rechazado: statusIcon = Icons.cancel; statusColor = AppColors.errorDark; statusText = "Rechazado"; break;
+               case PlanAssignmentStatus.pendiente:
+               default: statusIcon = Icons.pending_actions; statusColor = AppColors.warningDark; statusText = "Pendiente"; break;
+             }
 
              return Card(
-               margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
                child: ListTile(
                  leading: Tooltip(message: statusText, child: Icon(statusIcon, color: statusColor)),
-                 title: Text(assignment.planName ?? 'Plan ID: ${assignment.planId}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                 subtitle: Text('Asignado: ${DateFormat('dd/MM/yyyy').format(assignment.assignedAt.toDate())}\nEstado: $statusText'),
+                 title: Text(assignment.planName ?? 'Plan ID: ${assignment.planId}', style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                 subtitle: Text(
+                    'Asignado: ${DateFormat('dd/MM/yyyy').format(assignment.assignedAt.toDate())}\nEstado: $statusText',
+                    style: textTheme.bodySmall
+                 ),
                  isThreeLine: true,
                  trailing: assignment.status == PlanAssignmentStatus.pendiente
-                    ? Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          // IconButton Aceptar (con ajustes de layout)
-                          IconButton(
-                            icon: const Icon(Icons.check_circle_outline), color: Colors.green, tooltip: 'Aceptar Plan',
-                            padding: EdgeInsets.zero, visualDensity: VisualDensity.compact, constraints: const BoxConstraints(), splashRadius: 20,
-                            onPressed: () async {
-                              final prov = context.read<TrainingPlanProvider>();
-                              final success = await prov.updatePlayerAssignmentStatus(assignment.id, PlanAssignmentStatus.aceptado);
-                              if (!success && mounted) { /* SnackBar Error */ }
-                            },
-                          ),
-                          // IconButton Rechazar (con ajustes de layout)
-                          IconButton(
-                            icon: const Icon(Icons.cancel_outlined), color: Colors.red, tooltip: 'Rechazar Plan',
-                            padding: EdgeInsets.zero, visualDensity: VisualDensity.compact, constraints: const BoxConstraints(), splashRadius: 20,
-                            onPressed: () async {
-                               final prov = context.read<TrainingPlanProvider>();
-                               final success = await prov.updatePlayerAssignmentStatus(assignment.id, PlanAssignmentStatus.rechazado);
-                               if (!success && mounted) { /* SnackBar Error */ }
-                            },
-                          ),
-                        ],
-                      )
-                    : null,
-                 onTap: () { // Navegar a detalles
+                   ? Row( mainAxisSize: MainAxisSize.min, children: <Widget>[
+                       IconButton(
+                         icon: const Icon(Icons.check_circle_outline), color: AppColors.successDark, tooltip: 'Aceptar Plan',
+                         padding: EdgeInsets.zero, visualDensity: VisualDensity.compact, constraints: const BoxConstraints(), splashRadius: 20,
+                         onPressed: () async { /* ... Lógica Aceptar ... */
+                           final prov = context.read<TrainingPlanProvider>();
+                           final success = await prov.updatePlayerAssignmentStatus(assignment.id, PlanAssignmentStatus.aceptado);
+                            if (mounted && !success) { ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: const Text('Error al aceptar'), backgroundColor: colorScheme.error)); }
+                         },
+                       ),
+                       const SizedBox(width: 4),
+                       IconButton(
+                         icon: const Icon(Icons.cancel_outlined), color: AppColors.errorDark, tooltip: 'Rechazar Plan',
+                         padding: EdgeInsets.zero, visualDensity: VisualDensity.compact, constraints: const BoxConstraints(), splashRadius: 20,
+                         onPressed: () async { /* ... Lógica Rechazar ... */
+                            final prov = context.read<TrainingPlanProvider>();
+                            final success = await prov.updatePlayerAssignmentStatus(assignment.id, PlanAssignmentStatus.rechazado);
+                             if (mounted && !success) { ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: const Text('Error al rechazar'), backgroundColor: colorScheme.error)); }
+                         },
+                       ),
+                     ])
+                   : null,
+                 onTap: () {
                    if (assignment.planId.isNotEmpty) {
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => PlanDetailView(planId: assignment.planId)));
-                   } else { /* SnackBar error ID inválido */ }
+                     Navigator.push(context, MaterialPageRoute(builder: (_) => PlanDetailView(planId: assignment.planId)));
+                   } else {
+                     if (mounted) { ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: const Text('ID de plan inválido'), backgroundColor: colorScheme.error)); }
+                   }
                  },
+                 splashColor: AppColors.primary.withOpacity(0.1),
                ),
              );
-         }
+           }
+         ),
        );
     }
   }

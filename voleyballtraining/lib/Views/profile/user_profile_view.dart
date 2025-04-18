@@ -1,85 +1,111 @@
 // lib/views/profile/user_profile_view.dart
 
 import 'package:flutter/material.dart';
+import 'package:voleyballtraining/Views/Styles/buttons/custom_button_styles.dart';
 import '../../models/user_model.dart'; // Ajusta la ruta si es necesario
-// Importa intl para formatear fechas si quieres: flutter pub add intl
-// import 'package:intl/intl.dart';
+
+// --- > Importaciones de Estilos <---
+import 'package:voleyballtraining/Views/Styles/templates/container_default.dart';// Para el botón Editar
+// import 'package:intl/intl.dart'; // Descomenta si usas formateo de fecha avanzado
 
 class UserProfileView extends StatelessWidget {
-  // Recibe el perfil del usuario ya cargado desde HomeView
   final UserModel userProfile;
 
   const UserProfileView({super.key, required this.userProfile});
 
   @override
   Widget build(BuildContext context) {
-    // Construye la interfaz de usuario para mostrar los datos del perfil
-    // TODO: Diseña esta vista como prefieras
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+
     return Center(
-      child: Padding(
-         padding: const EdgeInsets.all(16.0),
-         child: Column(
-           mainAxisAlignment: MainAxisAlignment.center,
-           crossAxisAlignment: CrossAxisAlignment.start, // Alinea texto a la izquierda
-           children: [
-              // Título de la sección
-              Text(
-                'Mi Perfil',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold) // Usa el tema para estilo
-              ),
-              const SizedBox(height: 25), // Más espacio
+      child: FractionallySizedBox(
+        widthFactor: 0.95,
+        heightFactor: 0.95, // Puedes ajustar o quitar esto si prefieres altura automática
+        child: ContainerDefault(
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center, // Centrar contenido vertical
+              crossAxisAlignment: CrossAxisAlignment.start, // Alinear info a la izq.
+              children: [
+                // --- > LOGO AÑADIDO AQUÍ <---
+                Center( // Centrar logo horizontalmente
+                  child: Image.asset(
+                    'assets/images/Logo-icon.png', // Ruta al logo
+                    height: 80, // Altura deseada (ajusta)
+                  ),
+                ),
+                const SizedBox(height: 16), // Espacio después del logo
+                // --- > FIN LOGO <---
 
-              // Muestra los datos del UserModel recibido
-              _buildProfileInfoRow('Nombre:', userProfile.fullName),
-              _buildProfileInfoRow('Email:', userProfile.email),
-              _buildProfileInfoRow('Rol:', userProfile.role),
+                // Título de la sección
+                Center( // Mantener título centrado
+                  child: Text(
+                    'Mi Perfil',
+                    style: textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold)
+                  ),
+                ),
+                const SizedBox(height: 25),
 
-              // Muestra la fecha de creación (formateada opcionalmente)
-              _buildProfileInfoRow(
-                'Miembro desde:',
-                // DateFormat('dd/MM/yyyy').format(userProfile.createdAt.toDate()) // Ejemplo con intl
-                userProfile.createdAt.toDate().toLocal().toString().split(' ')[0] // Formato simple YYYY-MM-DD
-              ),
+                // Datos del perfil
+                _buildProfileInfoRow('Nombre:', userProfile.fullName, context),
+                _buildProfileInfoRow('Email:', userProfile.email, context),
+                _buildProfileInfoRow('Rol:', userProfile.role, context),
+                _buildProfileInfoRow(
+                  'Miembro desde:',
+                  userProfile.createdAt.toDate().toLocal().toString().split(' ')[0],
+                  context
+                ),
+                if (userProfile.idNumber != null && userProfile.idNumber!.isNotEmpty)
+                  _buildProfileInfoRow('Cédula:', userProfile.idNumber!, context),
+                if (userProfile.phoneNumber != null && userProfile.phoneNumber!.isNotEmpty)
+                  _buildProfileInfoRow('Teléfono:', userProfile.phoneNumber!, context),
+                if (userProfile.dateOfBirth != null)
+                    _buildProfileInfoRow(
+                      'Fecha Nacimiento:',
+                      userProfile.dateOfBirth!.toDate().toLocal().toString().split(' ')[0],
+                      context
+                    ),
 
-              // Muestra campos opcionales solo si tienen valor
-              if (userProfile.idNumber != null && userProfile.idNumber!.isNotEmpty)
-                _buildProfileInfoRow('Cédula:', userProfile.idNumber!),
+                const Spacer(), // <--- Añadido para empujar el botón hacia abajo
 
-              if (userProfile.phoneNumber != null && userProfile.phoneNumber!.isNotEmpty)
-                _buildProfileInfoRow('Teléfono:', userProfile.phoneNumber!),
-
-              if (userProfile.dateOfBirth != null)
-                 _buildProfileInfoRow(
-                  'Fecha Nacimiento:',
-                   userProfile.dateOfBirth!.toDate().toLocal().toString().split(' ')[0] // Formato simple
-                 ),
-
-              const SizedBox(height: 30), // Espacio antes del botón
-
-              // TODO: Añadir un botón para "Editar Perfil" que navegue a otra pantalla
-              // ElevatedButton(
-              //   onPressed: () { /* Navegar a pantalla de edición */ },
-              //   child: const Text('Editar Perfil'),
-              // ),
-           ],
-         ),
-      )
+                // Botón Editar Perfil
+                Center(
+                  child: ElevatedButton.icon(
+                    style: CustomButtonStyles.primary(),
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('TODO: Navegar a Editar Perfil'))
+                      );
+                    },
+                    icon: const Icon(Icons.edit_outlined, size: 18),
+                    label: const Text('Editar Perfil'),
+                  ),
+                ),
+                 const SizedBox(height: 10), // Pequeño espacio al final
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 
-  // Widget helper para mostrar una fila de información (Label: Valor)
-  Widget _buildProfileInfoRow(String label, String value) {
+  // Helper sin cambios
+  Widget _buildProfileInfoRow(String label, String value, BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      padding: const EdgeInsets.symmetric(vertical: 6.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             '$label ',
-            style: const TextStyle(fontWeight: FontWeight.bold), // Label en negrita
+            style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
-          Expanded( // Permite que el valor ocupe el resto del espacio y haga wrap
-            child: Text(value),
+          Expanded(
+            child: Text(value, style: textTheme.bodyMedium),
           ),
         ],
       ),
