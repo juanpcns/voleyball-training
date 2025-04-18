@@ -1,39 +1,73 @@
 name: voleyballtraining
 description: "A new Flutter project."
+
+# Prevent accidental publishing to pub.dev.
 publish_to: 'none'
 
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.7.2
+  sdk: '>=3.0.0 <4.0.0' # Ajustado para compatibilidad más amplia si usas Flutter 3.10+
+                       # Puedes mantener ^3.7.2 si estás seguro de esa versión exacta
 
 dependencies:
   flutter:
     sdk: flutter
+
+  # -- Componentes Visuales --
   cupertino_icons: ^1.0.8
-  firebase_core: ^2.32.0 # Usa la última versión disponible
-  # Firebase Authentication
-  firebase_auth: ^4.20.0 # Usa la última versión disponible
-  # Cloud Firestore
-  cloud_firestore: ^4.17.5 # Usa la última versión disponible
-  # State Management (Ejemplo con Provider)
-  provider: ^6.1.2 # Usa la última versión disponible
-  intl: ^0.20.2
+  shimmer: ^3.0.0             # Añadido para los placeholders
+
+  # -- Firebase --
+  firebase_core: ^2.32.0      # Asegúrate de que sea compatible con las otras deps de Firebase
+  firebase_auth: ^4.20.0
+  cloud_firestore: ^4.17.5
+  # firebase_analytics: ^12.0.0 # Descomenta si usas Analytics
+
+  # -- State Management --
+  provider: ^6.1.2
+
+  # -- Utilidades --
+  intl: ^0.19.0 # Actualizado a una versión más reciente (revisa compatibilidad)
+
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^5.0.0
+
+  flutter_lints: ^3.0.0 # Actualizado a versión más reciente (o usa la que prefieras)
+
 
 flutter:
   uses-material-design: true
 
+  # --- Assets ---
+  # Asegúrate de que estas rutas sean correctas
   assets:
     - assets/images/fondo.png
     - assets/images/hinata_container_default.png
     - assets/images/Logo-icon.png
-    
+    # Es buena práctica listar explícitamente la carpeta de fuentes
+    - assets/fonts/
+
+  # --- Fuentes ---
   fonts:
     - family: Poppins
       fonts:
+        # Asegúrate de que los nombres de archivo coincidan con los que tienes
+        # en la carpeta assets/fonts/
+        - asset: assets/fonts/Poppins-Light.ttf
+          weight: 300
+        - asset: assets/fonts/Poppins-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Poppins-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Poppins-SemiBold.ttf
+          weight: 600
         - asset: assets/fonts/Poppins-Bold.ttf
           weight: 700
+        # Puedes añadir más pesos si los necesitas (e.g., Black 900, Italic, etc.)
+        # Ejemplo Italic:
+        # - asset: assets/fonts/Poppins-RegularItalic.ttf
+        #   style: italic
+        #   weight: 400
