@@ -101,7 +101,7 @@ class MyApp extends StatelessWidget {
           // --- Estilos de Texto Base ---
           // Mapea tus estilos personalizados a los roles semánticos del tema
           // Aplicando el color naranja a los estilos de título/encabezado
-        textTheme: TextTheme(
+        textTheme: TextTheme( 
           // --- > Títulos/Encabezados en Naranja <---
           displayLarge: CustomTextStyles.h1White.copyWith(color: AppColors.primary),
           displayMedium: CustomTextStyles.h1White.copyWith(color: AppColors.primary),
