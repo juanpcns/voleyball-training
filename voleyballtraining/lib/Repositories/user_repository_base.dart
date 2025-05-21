@@ -1,23 +1,15 @@
-// lib/repositories/user_repository_base.dart
-import '../models/user_model.dart'; // Asegúrate que la ruta al modelo sea correcta
+import '../models/user_model.dart';
 
-// Contrato para las operaciones de base de datos relacionadas con los usuarios.
 abstract class UserRepositoryBase {
-
   /// Guarda el perfil completo del usuario en la base de datos.
-  /// Usualmente se llama después de un registro exitoso.
   Future<void> createUserProfile(UserModel user);
 
-  /// Obtiene el perfil de un usuario específico usando su ID (UID de Auth).
-  /// Devuelve [null] si el perfil no se encuentra.
+  /// Obtiene un perfil por su UID.
   Future<UserModel?> getUserProfile(String userId);
 
-  /// Obtiene un Stream con la lista de todos los usuarios registrados.
-  /// El Stream se actualiza automáticamente si hay cambios en Firestore.
+  /// Devuelve todos los usuarios en tiempo real.
   Stream<List<UserModel>> getUsers();
 
-  // --- Posibles métodos futuros ---
-  // Future<void> updateUserProfile(UserModel user);
-  // Future<void> deleteUserProfile(String userId);
-  // Stream<List<UserModel>> getPlayers(); // Podría ser un método específico para obtener solo jugadores
+  /// ✅ Devuelve usuarios filtrados por rol ('Jugador', 'Entrenador', etc).
+  Future<List<UserModel>> getUsersByRole(String role);
 }

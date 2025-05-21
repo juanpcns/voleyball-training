@@ -1,5 +1,3 @@
-// lib/providers/user_provider.dart (COMPLETO con getter playerUsers y typo corregido)
-
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import '../models/user_model.dart';
@@ -10,65 +8,73 @@ class UserProvider with ChangeNotifier {
 
   UserProvider(this._userRepository);
 
-  // --- State ---
+  // --- Estado interno ---
   List<UserModel> _users = [];
   bool _isLoading = false;
   String? _errorMessage;
   StreamSubscription? _usersSubscription;
 
-  // --- Getters ---
-  List<UserModel> get users => _users; // Todos los usuarios
+  // --- Getters públicos ---
+  List<UserModel> get users => _users;
+
+  /// ✅ Getter para obtener solo jugadores del estado actual
+  List<UserModel> get playerUsers =>
+      _users.where((user) => user.role == 'Jugador').toList();
+
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
-  /// *** GETTER AÑADIDO: Filtra la lista para obtener solo Jugadores ***
-  List<UserModel> get playerUsers =>
-      _users.where((user) => user.role == 'Jugador').toList();
-  // --- Fin Getter Añadido ---
-
-  // --- Métodos ---
-
-  /// Carga y escucha la lista de todos los usuarios.
+  // --- Carga con stream (modo en tiempo real) ---
   Future<void> loadUsers() async {
-    if (kDebugMode) print("--- UserProvider: Iniciando carga/escucha de usuarios ---");
-    _updateUserState(loading: true, error: null); // Usa helper para notificar
+    if (kDebugMode) print("🔄 UserProvider: Cargando usuarios en tiempo real...");
+    _updateUserState(loading: true, error: null);
 
-    await _usersSubscription?.cancel(); // Cancela anterior
+    await _usersSubscription?.cancel();
+
     _usersSubscription = _userRepository.getUsers().listen(
       (fetchedUsers) {
-        if (kDebugMode) print("--- UserProvider: Usuarios recibidos: ${fetchedUsers.length} ---");
+        if (kDebugMode) print("✅ UserProvider: Usuarios recibidos: ${fetchedUsers.length}");
         _users = fetchedUsers;
-        _updateUserState(loading: false); // Usa helper para notificar
+        _updateUserState(loading: false);
       },
       onError: (error) {
-        if (kDebugMode) print("--- UserProvider: ERROR en stream de usuarios: $error ---");
+        if (kDebugMode) print("❌ UserProvider: Error al obtener usuarios: $error");
         _users = [];
-        _updateUserState(loading: false, error: "No se pudieron cargar los usuarios: ${error.toString()}");
+        _updateUserState(loading: false, error: "Error al cargar usuarios: $error");
       },
-      onDone: () {
-        if (kDebugMode) print("--- UserProvider: Stream de usuarios cerrado ---");
-        _updateUserState(loading: false); // Asegurar que pare la carga
-      }
     );
   }
 
-
-  // --- State Helper ---
-  /// Helper para actualizar el estado y notificar a los listeners una sola vez.
-  void _updateUserState({bool? loading, String? error}) {
-      bool changed = false;
-      if (loading != null && _isLoading != loading) { _isLoading = loading; changed = true; }
-      if ((loading == true && _errorMessage != null) || (error == null && _errorMessage != null)) { _errorMessage = null; changed = true; }
-      if (error != null && _errorMessage != error) { _errorMessage = error; changed = true; }
-      if (changed) { notifyListeners(); }
+  /// ✅ Consulta directa a Firestore para traer solo jugadores
+  Future<List<UserModel>> fetchPlayers() async {
+    try {
+      if (kDebugMode) print("➡️ UserProvider: Buscando jugadores desde repositorio...");
+      return await _userRepository.getUsersByRole('Jugador');
+    } catch (e) {
+      if (kDebugMode) print("❌ Error al obtener jugadores: $e");
+      return [];
+    }
   }
 
+  // --- Ayuda para actualizar estado y notificar cambios ---
+  void _updateUserState({bool? loading, String? error}) {
+    bool changed = false;
+    if (loading != null && _isLoading != loading) {
+      _isLoading = loading;
+      changed = true;
+    }
+    if (error != null && _errorMessage != error) {
+      _errorMessage = error;
+      changed = true;
+    }
+    if (changed) notifyListeners();
+  }
 
   // --- Cleanup ---
   @override
   void dispose() {
-    if (kDebugMode) print("--- UserProvider: Disposing ---");
+    if (kDebugMode) print("🧹 UserProvider: Cancelando stream...");
     _usersSubscription?.cancel();
     super.dispose();
   }
-} // <-- Llave de cierre correcta para la clase
+}
