@@ -10,6 +10,7 @@ import 'plans/training_plans_view.dart';
 import 'profile/user_profile_view.dart';
 import 'users/user_list_view.dart';
 import 'plans/create_plan_view.dart';
+import 'menu/main_menu_view.dart'; // <--- Importa tu nuevo menú visual
 
 import 'package:voleyballtraining/Views/Styles/colors/app_colors.dart';
 
@@ -42,26 +43,17 @@ class _HomeViewState extends State<HomeView> {
     final userRepo = Provider.of<UserRepositoryBase>(context, listen: false);
     final authProv = Provider.of<AuthProvider>(context, listen: false);
 
-    print("--- HomeView _loadUserProfile: User UID from Provider: ${user?.uid} ---");
-
     if (user != null) {
       try {
-        print("--- HomeView _loadUserProfile: Calling getUserProfile for UID: ${user.uid} ---");
         final profile = await userRepo.getUserProfile(user.uid);
-
-        print(">>> PERFIL CARGADO: $profile");
-
         if (mounted) {
           setState(() {
             _currentUserModel = profile;
             _isLoadingProfile = false;
             _loadingError = profile == null ? "No se encontró el perfil del usuario." : null;
-            print("--- HomeView _loadUserProfile: Profile loaded. Role: ${_currentUserModel?.role}. Error: $_loadingError ---");
           });
         }
       } catch (e) {
-        print("--- ERROR en getUserProfile ---");
-        print(e);
         if (mounted) {
           setState(() {
             _isLoadingProfile = false;
@@ -70,7 +62,6 @@ class _HomeViewState extends State<HomeView> {
         }
       }
     } else {
-      print("--- HomeView _loadUserProfile: ERROR - User from Provider is null! ---");
       if (mounted) {
         setState(() {
           _isLoadingProfile = false;
@@ -85,19 +76,14 @@ class _HomeViewState extends State<HomeView> {
     final bool isCoach = _currentUserModel?.role == 'Entrenador';
     final int maxIndex = isCoach ? 2 : 1;
     if (index >= 0 && index <= maxIndex) {
-      print("--- _onItemTapped: Tapped index: $index ---");
       setState(() {
         _selectedIndex = index;
       });
-    } else {
-      print("--- _onItemTapped: WARN - Tapped index $index is out of bounds ---");
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    print("--- Construyendo HomeView. Índice: $_selectedIndex. Cargando: $_isLoadingProfile. Error: $_loadingError ---");
-
     final authProvider = context.read<AuthProvider>();
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
@@ -126,7 +112,6 @@ class _HomeViewState extends State<HomeView> {
     }
 
     final bool isCoach = _currentUserModel!.role == 'Entrenador';
-    print("--- HomeView Build: Perfil Cargado. Rol: ${_currentUserModel!.role}. Mostrando UI con índice: $_selectedIndex ---");
 
     final List<Widget> widgetOptions = [
       TrainingPlansView(userModel: _currentUserModel!),
@@ -135,9 +120,6 @@ class _HomeViewState extends State<HomeView> {
     ];
 
     final int effectiveIndex = (_selectedIndex >= 0 && _selectedIndex < widgetOptions.length) ? _selectedIndex : 0;
-    if (_selectedIndex != effectiveIndex) {
-      print("--- HomeView Build: WARN - _selectedIndex ($_selectedIndex) fuera de rango. Usando índice 0. ---");
-    }
 
     return Stack(
       children: [
@@ -153,6 +135,17 @@ class _HomeViewState extends State<HomeView> {
             backgroundColor: Colors.transparent,
             elevation: 0,
             actions: [
+              // --- Botón para ir al menú principal, SOLO aquí ---
+              IconButton(
+                icon: const Icon(Icons.home),
+                tooltip: 'Menú Principal',
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const MainMenuView()),
+                  );
+                },
+              ),
               IconButton(
                 icon: const Icon(Icons.logout),
                 tooltip: 'Cerrar Sesión',

@@ -7,6 +7,9 @@ import '../profile/user_detail_view.dart';
 import 'package:voleyballtraining/Views/Styles/colors/app_colors.dart';
 import 'package:voleyballtraining/Views/Styles/tipography/text_styles.dart';
 
+// Importa el fondo global
+import 'package:voleyballtraining/Views/Styles/templates/home_view_template.dart';
+
 class UserListView extends StatefulWidget {
   final UserModel userModel;
 
@@ -23,20 +26,15 @@ class _UserListViewState extends State<UserListView> {
   void initState() {
     super.initState();
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-    _usersFuture = userProvider.fetchPlayers(); // Puedes cambiar a getUsers() si quieres ver entrenadores también
+    _usersFuture = userProvider.fetchPlayers();
   }
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        title: Text('Gestionar Usuarios', style: textTheme.titleLarge),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-      ),
+    return HomeViewTemplate(
+      title: 'Gestionar Usuarios',
       body: FutureBuilder<List<UserModel>>(
         future: _usersFuture,
         builder: (context, snapshot) {
