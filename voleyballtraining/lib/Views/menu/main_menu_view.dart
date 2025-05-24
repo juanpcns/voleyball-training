@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:voleyballtraining/Views/chats/chats_list_view.dart';
 import '../../providers/auth_provider.dart';
 import '../plans/training_plans_view.dart';
 import '../profile/user_profile_view.dart';
 import '../users/user_list_view.dart';
 import 'package:voleyballtraining/Views/Styles/colors/app_colors.dart';
 import 'package:voleyballtraining/Views/Styles/templates/home_view_template.dart';
+// ¡AQUÍ va la importación de la pantalla de chats!
 
 class MainMenuView extends StatelessWidget {
   const MainMenuView({super.key});
@@ -131,8 +133,11 @@ class MainMenuView extends StatelessWidget {
                                   icon: Icons.chat_rounded,
                                   label: 'Chats',
                                   onTap: () {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(content: Text('Próximamente...')),
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => const ChatsListView(),
+                                      ),
                                     );
                                   },
                                 ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart' show User;
 import 'package:provider/provider.dart';
+import 'package:voleyballtraining/providers/chat_provider.dart';
 import 'firebase_options.dart'; // Opciones de Firebase
 
 // --- Importaciones de Estilos ---
@@ -50,6 +51,7 @@ class MyApp extends StatelessWidget {
         Provider<UserRepositoryBase>(create: (_) => FirestoreUserRepository()),
         Provider<TrainingPlanRepositoryBase>(create: (_) => FirestoreTrainingPlanRepository()),
         Provider<PlanAssignmentRepositoryBase>(create: (_) => FirestorePlanAssignmentRepository()),
+        ChangeNotifierProvider(create: (_) => ChatProvider()),
         StreamProvider<User?>(
           create: (context) => context.read<AuthRepositoryBase>().authStateChanges,
           initialData: null,
