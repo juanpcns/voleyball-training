@@ -1,25 +1,37 @@
+// lib/models/message_model.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class MessageModel {
-  final String? id;                // Hacemos el id opcional
+  final String? id;
   final String senderId;
   final String text;
   final DateTime timestamp;
 
   MessageModel({
-    this.id,                       // Ahora es opcional
+    this.id,
     required this.senderId,
     required this.text,
     required this.timestamp,
   });
 
-  // Factory para crear desde Firestore (asegúrate de soportar id opcional)
+  // Factory que soporta Timestamp (Firestore), DateTime y String (ISO8601)
   factory MessageModel.fromMap(Map<String, dynamic> map, {String? id}) {
+    DateTime parsedTimestamp;
+    if (map['timestamp'] is Timestamp) {
+      parsedTimestamp = (map['timestamp'] as Timestamp).toDate();
+    } else if (map['timestamp'] is DateTime) {
+      parsedTimestamp = map['timestamp'] as DateTime;
+    } else if (map['timestamp'] is String) {
+      parsedTimestamp = DateTime.parse(map['timestamp']);
+    } else {
+      throw Exception('Formato de fecha no soportado: ${map['timestamp'].runtimeType}');
+    }
+
     return MessageModel(
-      id: id, // puede venir nulo si lo usas así
+      id: id,
       senderId: map['senderId'],
       text: map['text'],
-      timestamp: (map['timestamp'] as Timestamp).toDate(),
+      timestamp: parsedTimestamp,
     );
   }
 
@@ -27,7 +39,7 @@ class MessageModel {
     return {
       'senderId': senderId,
       'text': text,
-      'timestamp': timestamp,
+      'timestamp': timestamp, // Firestore acepta DateTime
     };
   }
 }

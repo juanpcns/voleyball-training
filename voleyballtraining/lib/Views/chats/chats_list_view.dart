@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/chat_provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/user_provider.dart';
 import '../../models/chat_model.dart';
-import '../../models/user_model.dart'; // <- IMPORTANTE para UserModel
-import '../../providers/user_provider.dart'; // <- Asegúrate de importar el UserProvider
+import '../../models/user_model.dart';
 import 'chat_view.dart';
 import 'select_user_for_chat_view.dart';
+import 'package:voleyballtraining/Views/Styles/colors/app_colors.dart';
+import 'package:voleyballtraining/Views/Styles/templates/home_view_template.dart';
 
 class ChatsListView extends StatefulWidget {
   const ChatsListView({Key? key}) : super(key: key);
@@ -23,9 +25,9 @@ class _ChatsListViewState extends State<ChatsListView> {
     final currentUser = Provider.of<AuthProvider>(context, listen: false).currentUserModel;
     if (currentUser != null) {
       Provider.of<ChatProvider>(context, listen: false).loadUserChats(currentUser.userId);
-      // Cargar usuarios también (¡importante para los nombres!)
-      Provider.of<UserProvider>(context, listen: false).loadUsers();
     }
+    // Cargar los usuarios una sola vez (si no está ya cargado)
+    Provider.of<UserProvider>(context, listen: false).loadUsers();
   }
 
   @override
@@ -34,54 +36,109 @@ class _ChatsListViewState extends State<ChatsListView> {
     final userProvider = Provider.of<UserProvider>(context);
     final currentUser = Provider.of<AuthProvider>(context).currentUserModel;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Tus Chats'),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-      ),
-      body: chatProvider.userChats.isEmpty
-          ? const Center(child: Text('No tienes chats aún.'))
-          : ListView.builder(
-              itemCount: chatProvider.userChats.length,
-              itemBuilder: (context, index) {
-                final chat = chatProvider.userChats[index];
-                final otherUserId = chat.participantIds.firstWhere((id) => id != currentUser?.userId);
+    return HomeViewTemplate(
+      title: 'Tus Chats',
+      body: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(18),
+          color: Colors.black.withOpacity(0.25),
+        ),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 6),
+        child: chatProvider.userChats.isEmpty
+            ? Center(
+                child: Text(
+                  'No tienes chats aún.',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: Colors.white70,
+                        fontWeight: FontWeight.w400,
+                      ),
+                ),
+              )
+            : ListView.separated(
+                itemCount: chatProvider.userChats.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 6),
+                itemBuilder: (context, index) {
+                  final chat = chatProvider.userChats[index];
+                  final otherUserId = chat.participantIds.firstWhere((id) => id != currentUser?.userId);
 
-                // Buscar el usuario real por su ID
-                final otherUser = userProvider.users.firstWhere(
-                  (u) => u.userId == otherUserId,
-                  orElse: () => UserModel(
-                    userId: otherUserId,
-                    email: '',
-                    fullName: 'Usuario',
-                    role: '',
-                    createdAt: Timestamp.now(),
-                    dateOfBirth: null,
-                    phoneNumber: null,
-                    idNumber: null,
-                  ),
-                );
+                  // Buscar el nombre real del usuario
+                  final otherUser = userProvider.users.firstWhere(
+                    (u) => u.userId == otherUserId,
+                    orElse: () => UserModel(
+                      userId: otherUserId,
+                      email: '',
+                      fullName: 'Usuario',
+                      role: '',
+                      createdAt: Timestamp.fromDate(DateTime.now()),
+                      dateOfBirth: null,
+                      phoneNumber: null,
+                      idNumber: null,
+                    ),
+                  );
 
-                return ListTile(
-                  leading: const CircleAvatar(child: Icon(Icons.person)),
-                  title: Text('Chat con: ${otherUser.fullName}'),
-                  subtitle: Text(chat.lastMessage ?? ''),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => ChatView(
-                          chatId: chat.id,
-                          currentUserId: currentUser!.userId,
-                          otherUserName: otherUser.fullName, // <-- Ya lo envías por nombre real
+                  final displayName = otherUser.fullName.isNotEmpty ? otherUser.fullName : otherUserId;
+
+                  return Card(
+                    elevation: 4,
+                    color: AppColors.surfaceDark.withOpacity(0.80),
+                    shadowColor: AppColors.primary.withOpacity(0.16),
+                    margin: const EdgeInsets.symmetric(vertical: 3, horizontal: 4),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(17)),
+                    child: ListTile(
+                      leading: CircleAvatar(
+                        radius: 26,
+                        backgroundColor: AppColors.secondary.withOpacity(0.96),
+                        child: Text(
+                          displayName.isNotEmpty ? displayName[0].toUpperCase() : '?',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 22,
+                          ),
                         ),
                       ),
-                    );
-                  },
-                );
-              },
-            ),
+                      title: Text(
+                        displayName,
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      subtitle: (chat.lastMessage != null && chat.lastMessage!.isNotEmpty)
+                          ? Text(
+                              chat.lastMessage!,
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: Colors.white70,
+                                  ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            )
+                          : Text(
+                              " ",
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Colors.white38,
+                                  ),
+                            ),
+                      trailing: const Icon(Icons.chevron_right_rounded, color: Colors.white38),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ChatView(
+                              chatId: chat.id,
+                              currentUserId: currentUser!.userId,
+                              otherUserName: displayName,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+      ),
       floatingActionButton: currentUser == null
           ? null
           : FloatingActionButton(
@@ -93,8 +150,10 @@ class _ChatsListViewState extends State<ChatsListView> {
                   ),
                 );
               },
-              child: const Icon(Icons.chat),
+              backgroundColor: AppColors.primary,
+              child: const Icon(Icons.chat, color: Colors.white, size: 32),
               tooltip: 'Nuevo chat',
+              elevation: 4,
             ),
     );
   }
