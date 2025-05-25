@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:voleyballtraining/Views/plans/create_plan_view.dart';
 
 // --- Importa Modelos y Providers ---
 import '../../models/user_model.dart';
@@ -14,7 +15,6 @@ import 'plan_detail_view.dart';
 // --- > IMPORTA EL TEMPLATE DE FONDO <---
 import 'package:voleyballtraining/Views/Styles/templates/home_view_template.dart';
 import 'package:voleyballtraining/Views/Styles/colors/app_colors.dart';
-import 'package:voleyballtraining/Views/Styles/templates/container_default.dart';
 
 class TrainingPlansView extends StatefulWidget {
   final UserModel userModel;
@@ -25,19 +25,24 @@ class TrainingPlansView extends StatefulWidget {
 }
 
 class _TrainingPlansViewState extends State<TrainingPlansView> {
+  bool _hasLoadedPlans = false;
+
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    // Solo carga si no se ha hecho antes y si hay usuario cargado
+    if (!_hasLoadedPlans && widget.userModel.userId.isNotEmpty) {
       final planProvider = context.read<TrainingPlanProvider>();
+      final userProvider = context.read<UserProvider>();
       if (widget.userModel.role == 'Entrenador') {
         planProvider.loadCoachPlans();
-        context.read<UserProvider>().loadUsers();
+        userProvider.loadUsers();
       } else {
         planProvider.loadPlayerAssignments();
       }
-    });
+      _hasLoadedPlans = true;
+    }
   }
 
   Future<void> _showPlayerSelectionDialog(BuildContext context, String planId, String planName) async {
@@ -60,7 +65,7 @@ class _TrainingPlansViewState extends State<TrainingPlansView> {
         return AlertDialog(
           backgroundColor: AppColors.surfaceDark,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
-          title: Text('Asignar plan:\n"${planName}"', style: textTheme.titleLarge),
+          title: Text('Asignar plan:\n"$planName"', style: textTheme.titleLarge),
           contentPadding: EdgeInsets.zero,
           content: Container(
             width: double.maxFinite,
@@ -106,16 +111,26 @@ class _TrainingPlansViewState extends State<TrainingPlansView> {
     final planProvider = context.watch<TrainingPlanProvider>();
     final bool isCoach = widget.userModel.role == 'Entrenador';
 
-    // --- USAMOS HomeViewTemplate COMO FONDO GLOBAL ---
     return HomeViewTemplate(
       title: 'Planes de Entrenamiento',
       body: _buildBody(planProvider, isCoach, context),
-      // Puedes agregar floatingActionButton, actions, etc aquí si quieres
-      // floatingActionButton: ...
+      floatingActionButton: isCoach
+          ? FloatingActionButton(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              tooltip: 'Crear nuevo plan',
+              child: const Icon(Icons.add),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => CreatePlanView()),
+                );
+              },
+            )
+          : null,
     );
   }
 
-  // El cuerpo de la vista (puedes seguir usando ContainerDefault aquí si quieres un panel visual dentro del body)
   Widget _buildBody(TrainingPlanProvider planProvider, bool isCoach, BuildContext context) {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;

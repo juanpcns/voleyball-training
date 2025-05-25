@@ -7,7 +7,6 @@ import '../profile/user_profile_view.dart';
 import '../users/user_list_view.dart';
 import 'package:voleyballtraining/Views/Styles/colors/app_colors.dart';
 import 'package:voleyballtraining/Views/Styles/templates/home_view_template.dart';
-// ¡AQUÍ va la importación de la pantalla de chats!
 
 class MainMenuView extends StatelessWidget {
   const MainMenuView({super.key});
@@ -30,7 +29,6 @@ class MainMenuView extends StatelessWidget {
                       // Logo y Bienvenida
                       Column(
                         children: [
-                          // Logo grande (puedes ajustar)
                           CircleAvatar(
                             radius: 40,
                             backgroundColor: Colors.transparent,
@@ -76,7 +74,7 @@ class MainMenuView extends StatelessWidget {
                       ),
                       const SizedBox(height: 20),
 
-                      // Panel principal (con borde glow y fondo translúcido)
+                      // Panel principal
                       Container(
                         decoration: BoxDecoration(
                           color: Colors.black.withOpacity(0.70),
@@ -117,7 +115,8 @@ class MainMenuView extends StatelessWidget {
                                   onTap: () => Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (_) => UserProfileView(userProfile: user)),
+                                      builder: (_) => UserProfileView(userProfile: user!),
+                                    ),
                                   ),
                                 ),
                                 _PanelButton(
@@ -126,7 +125,8 @@ class MainMenuView extends StatelessWidget {
                                   onTap: () => Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (_) => TrainingPlansView(userModel: user)),
+                                      builder: (_) => TrainingPlansView(userModel: user!),
+                                    ),
                                   ),
                                 ),
                                 _PanelButton(
@@ -150,7 +150,20 @@ class MainMenuView extends StatelessWidget {
                                     );
                                   },
                                 ),
-                                // Puedes agregar más botones aquí
+                                // Solo para entrenadores: Ver Usuarios
+                                if (user!.role == 'Entrenador')
+                                  _PanelButton(
+                                    icon: Icons.group,
+                                    label: 'Ver Usuarios',
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => UserListView(userModel: user),
+                                        ),
+                                      );
+                                    },
+                                  ),
                               ],
                             ),
                           ],
@@ -202,7 +215,6 @@ class MainMenuView extends StatelessWidget {
   }
 }
 
-// --- Widget para cada botón de panel ---
 class _PanelButton extends StatelessWidget {
   final IconData icon;
   final String label;
