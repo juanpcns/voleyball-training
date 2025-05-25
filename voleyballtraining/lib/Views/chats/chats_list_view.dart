@@ -1,9 +1,13 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/chat_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../models/chat_model.dart';
+import '../../models/user_model.dart'; // <- IMPORTANTE para UserModel
+import '../../providers/user_provider.dart'; // <- Asegúrate de importar el UserProvider
 import 'chat_view.dart';
+import 'select_user_for_chat_view.dart';
 
 class ChatsListView extends StatefulWidget {
   const ChatsListView({Key? key}) : super(key: key);
@@ -16,16 +20,18 @@ class _ChatsListViewState extends State<ChatsListView> {
   @override
   void initState() {
     super.initState();
-    // Cargar los chats del usuario logueado
     final currentUser = Provider.of<AuthProvider>(context, listen: false).currentUserModel;
     if (currentUser != null) {
       Provider.of<ChatProvider>(context, listen: false).loadUserChats(currentUser.userId);
+      // Cargar usuarios también (¡importante para los nombres!)
+      Provider.of<UserProvider>(context, listen: false).loadUsers();
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final chatProvider = Provider.of<ChatProvider>(context);
+    final userProvider = Provider.of<UserProvider>(context);
     final currentUser = Provider.of<AuthProvider>(context).currentUserModel;
 
     return Scaffold(
@@ -42,9 +48,24 @@ class _ChatsListViewState extends State<ChatsListView> {
                 final chat = chatProvider.userChats[index];
                 final otherUserId = chat.participantIds.firstWhere((id) => id != currentUser?.userId);
 
+                // Buscar el usuario real por su ID
+                final otherUser = userProvider.users.firstWhere(
+                  (u) => u.userId == otherUserId,
+                  orElse: () => UserModel(
+                    userId: otherUserId,
+                    email: '',
+                    fullName: 'Usuario',
+                    role: '',
+                    createdAt: Timestamp.now(),
+                    dateOfBirth: null,
+                    phoneNumber: null,
+                    idNumber: null,
+                  ),
+                );
+
                 return ListTile(
                   leading: const CircleAvatar(child: Icon(Icons.person)),
-                  title: Text('Chat con: $otherUserId'),
+                  title: Text('Chat con: ${otherUser.fullName}'),
                   subtitle: Text(chat.lastMessage ?? ''),
                   onTap: () {
                     Navigator.push(
@@ -53,7 +74,7 @@ class _ChatsListViewState extends State<ChatsListView> {
                         builder: (_) => ChatView(
                           chatId: chat.id,
                           currentUserId: currentUser!.userId,
-                          // Puedes agregar el nombre real si lo tienes (opcional)
+                          otherUserName: otherUser.fullName, // <-- Ya lo envías por nombre real
                         ),
                       ),
                     );
@@ -65,10 +86,11 @@ class _ChatsListViewState extends State<ChatsListView> {
           ? null
           : FloatingActionButton(
               onPressed: () {
-                // Aquí deberías llevar a una pantalla para seleccionar usuario
-                // Por ahora solo muestra un mensaje
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Función de nuevo chat próximamente.')),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => SelectUserForChatView(currentUser: currentUser),
+                  ),
                 );
               },
               child: const Icon(Icons.chat),
