@@ -8,6 +8,9 @@ import '../users/user_list_view.dart';
 import 'package:voleyballtraining/Views/Styles/colors/app_colors.dart';
 import 'package:voleyballtraining/Views/Styles/templates/home_view_template.dart';
 
+// IMPORTA LA NUEVA VISTA DE ESTADÍSTICAS
+import '../stats/stats_view_selector.dart';
+
 class MainMenuView extends StatelessWidget {
   const MainMenuView({super.key});
 
@@ -145,8 +148,11 @@ class MainMenuView extends StatelessWidget {
                                   icon: Icons.bar_chart_rounded,
                                   label: 'Estadísticas',
                                   onTap: () {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(content: Text('Próximamente...')),
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => StatsViewSelector(userModel: user!),
+                                      ),
                                     );
                                   },
                                 ),

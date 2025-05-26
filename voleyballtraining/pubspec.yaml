@@ -29,6 +29,7 @@ dependencies:
 
   # -- Utilidades --
   intl: ^0.19.0 # Actualizado a una versión más reciente (revisa compatibilidad)
+  fl_chart: ^1.0.0
 
 
 dev_dependencies:
