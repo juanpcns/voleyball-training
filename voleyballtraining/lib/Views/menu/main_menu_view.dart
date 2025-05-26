@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:voleyballtraining/Views/chats/chats_list_view.dart';
+import 'package:voleyballtraining/Views/plans/training_plans_view.dart';
 import '../../providers/auth_provider.dart';
-import '../plans/training_plans_view.dart';
 import '../profile/user_profile_view.dart';
 import '../users/user_list_view.dart';
 import 'package:voleyballtraining/Views/Styles/colors/app_colors.dart';
@@ -128,7 +128,7 @@ class MainMenuView extends StatelessWidget {
                                   onTap: () => Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (_) => TrainingPlansView(userModel: user!),
+                                      builder: (_) => TrainingPlansView(userModel: user),
                                     ),
                                   ),
                                 ),

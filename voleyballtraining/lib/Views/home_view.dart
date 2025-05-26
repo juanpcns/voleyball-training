@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart' show User;
+import 'package:voleyballtraining/Providers/training_plan_provider.dart';
+import 'package:voleyballtraining/Providers/user_provider.dart';
+import 'package:voleyballtraining/views/plans/training_plans_view.dart';
 
 import '../repositories/user_repository_base.dart';
 import '../models/user_model.dart';
 import '../providers/auth_provider.dart';
 
-import 'plans/training_plans_view.dart';
 import 'profile/user_profile_view.dart';
 import 'users/user_list_view.dart';
 import 'plans/create_plan_view.dart';
@@ -53,6 +55,20 @@ class _HomeViewState extends State<HomeView> {
             _loadingError = profile == null ? "No se encontró el perfil del usuario." : null;
           });
         }
+
+        // Cargar planes o usuarios según rol
+        final trainingPlanProvider = Provider.of<TrainingPlanProvider>(context, listen: false);
+        final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+        if (profile != null) {
+          if (profile.role == 'Entrenador') {
+            trainingPlanProvider.loadCoachPlans();
+            userProvider.loadUsers();
+          } else {
+            trainingPlanProvider.loadPlayerAssignments();
+          }
+        }
+
       } catch (e) {
         if (mounted) {
           setState(() {

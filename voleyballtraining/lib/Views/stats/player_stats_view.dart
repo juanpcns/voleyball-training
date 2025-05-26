@@ -1,6 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../Views/Styles/colors/app_colors.dart';
+
+import '../../models/plan_assignment_model.dart';
+import '../../repositories/plan_assignment_repository_base.dart';
+
+extension IterableExtension<E> on Iterable<E> {
+  Iterable<T> mapIndexed<T>(T Function(int index, E e) f) sync* {
+    int index = 0;
+    for (final e in this) {
+      yield f(index, e);
+      index++;
+    }
+  }
+}
 
 class PlayerStatsView extends StatelessWidget {
   final String playerId;
@@ -12,147 +26,51 @@ class PlayerStatsView extends StatelessWidget {
     required this.playerName,
   });
 
-  // MOCK DATA para cada letra
-  Map<String, dynamic> get _mockStatsJ => {
-        'totalAssigned': 20,
-        'totalAccepted': 18,
-        'totalRejected': 0,
-        'totalCompleted': 16,
-        'averageProgress': 0.95,
-        'progressOverTime': [
-          {'date': DateTime(2024, 5, 1), 'progress': 0.25},
-          {'date': DateTime(2024, 5, 5), 'progress': 0.55},
-          {'date': DateTime(2024, 5, 10), 'progress': 0.75},
-          {'date': DateTime(2024, 5, 15), 'progress': 0.92},
-          {'date': DateTime(2024, 5, 20), 'progress': 1.0},
-        ],
-        'statusDistribution': {
-          'Pendiente': 2,
-          'Aceptado': 10,
-          'Rechazado': 0,
-          'Completado': 8,
-        },
-        'weeklyComparison': [
-          {'week': 'Semana 1', 'completed': 4},
-          {'week': 'Semana 2', 'completed': 5},
-          {'week': 'Semana 3', 'completed': 3},
-          {'week': 'Semana 4', 'completed': 4},
-        ]
-      };
+  /// Convierte el enum a string amigable para mostrar en gráficos
+  String estadoToString(PlanAssignmentStatus estado) {
+    switch (estado) {
+      case PlanAssignmentStatus.aceptado:
+        return 'Aceptado';
+      case PlanAssignmentStatus.completado:
+        return 'Completado';
+      case PlanAssignmentStatus.pendiente:
+        return 'Pendiente';
+      case PlanAssignmentStatus.rechazado:
+        return 'Rechazado';
+      default:
+        return 'Otro';
+    }
+  }
 
-  Map<String, dynamic> get _mockStatsA => {
-        'totalAssigned': 8,
-        'totalAccepted': 6,
-        'totalRejected': 2,
-        'totalCompleted': 3,
-        'averageProgress': 0.55,
-        'progressOverTime': [
-          {'date': DateTime(2024, 5, 3), 'progress': 0.10},
-          {'date': DateTime(2024, 5, 7), 'progress': 0.30},
-          {'date': DateTime(2024, 5, 12), 'progress': 0.48},
-          {'date': DateTime(2024, 5, 18), 'progress': 0.55},
-          {'date': DateTime(2024, 5, 21), 'progress': 0.61},
-        ],
-        'statusDistribution': {
-          'Pendiente': 1,
-          'Aceptado': 4,
-          'Rechazado': 2,
-          'Completado': 3,
-        },
-        'weeklyComparison': [
-          {'week': 'Semana 1', 'completed': 1},
-          {'week': 'Semana 2', 'completed': 0},
-          {'week': 'Semana 3', 'completed': 2},
-          {'week': 'Semana 4', 'completed': 0},
-        ]
-      };
-
-  Map<String, dynamic> get _mockStatsO => {
-        'totalAssigned': 15,
-        'totalAccepted': 10,
-        'totalRejected': 3,
-        'totalCompleted': 7,
-        'averageProgress': 0.70,
-        'progressOverTime': [
-          {'date': DateTime(2024, 5, 2), 'progress': 0.15},
-          {'date': DateTime(2024, 5, 6), 'progress': 0.32},
-          {'date': DateTime(2024, 5, 11), 'progress': 0.58},
-          {'date': DateTime(2024, 5, 16), 'progress': 0.72},
-          {'date': DateTime(2024, 5, 22), 'progress': 0.90},
-        ],
-        'statusDistribution': {
-          'Pendiente': 3,
-          'Aceptado': 6,
-          'Rechazado': 2,
-          'Completado': 4,
-        },
-        'weeklyComparison': [
-          {'week': 'Semana 1', 'completed': 2},
-          {'week': 'Semana 2', 'completed': 2},
-          {'week': 'Semana 3', 'completed': 1},
-          {'week': 'Semana 4', 'completed': 2},
-        ]
-      };
-
-  Map<String, dynamic> get _mockStatsDefault => {
-        'totalAssigned': 12,
-        'totalAccepted': 8,
-        'totalRejected': 2,
-        'totalCompleted': 5,
-        'averageProgress': 0.75,
-        'progressOverTime': [
-          {'date': DateTime(2024, 5, 10), 'progress': 0.2},
-          {'date': DateTime(2024, 5, 12), 'progress': 0.35},
-          {'date': DateTime(2024, 5, 15), 'progress': 0.55},
-          {'date': DateTime(2024, 5, 18), 'progress': 0.75},
-          {'date': DateTime(2024, 5, 20), 'progress': 1.0},
-        ],
-        'statusDistribution': {
-          'Pendiente': 3,
-          'Aceptado': 8,
-          'Rechazado': 1,
-          'Completado': 5,
-        },
-        'weeklyComparison': [
-          {'week': 'Semana 1', 'completed': 2},
-          {'week': 'Semana 2', 'completed': 1},
-          {'week': 'Semana 3', 'completed': 3},
-          {'week': 'Semana 4', 'completed': 4},
-        ]
-      };
-
-  Map<String, dynamic> get mockStats {
-    String initial = playerName.trim().isNotEmpty ? playerName.trim()[0].toUpperCase() : '';
-    if (initial == 'J') return _mockStatsJ;
-    if (initial == 'A') return _mockStatsA;
-    if (initial == 'O') return _mockStatsO;
-    return _mockStatsDefault;
+  static Color _pieColor(String key) {
+    switch (key) {
+      case 'Pendiente':
+        return AppColors.warningDark;
+      case 'Aceptado':
+        return AppColors.successDark;
+      case 'Rechazado':
+        return AppColors.errorDark;
+      case 'Completado':
+        return AppColors.secondary;
+      default:
+        return AppColors.primary.withOpacity(0.4);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final stats = mockStats;
-    final progressData = stats['progressOverTime'] as List;
-    final statusDistribution = stats['statusDistribution'] as Map<String, int>;
-    final weeklyComparison = stats['weeklyComparison'] as List;
+    final planAssignmentRepo = Provider.of<PlanAssignmentRepositoryBase>(context, listen: false);
 
     return Stack(
       children: [
-        // Imagen de fondo
         Positioned.fill(
-          child: Image.asset(
-            'assets/images/fondo.png',
-            fit: BoxFit.cover,
-          ),
+          child: Image.asset('assets/images/fondo.png', fit: BoxFit.cover),
         ),
         Positioned.fill(
-          child: Container(
-            color: Colors.black.withOpacity(0.67),
-          ),
+          child: Container(color: Colors.black.withOpacity(0.67)),
         ),
-        // Contenido principal
         Scaffold(
-          backgroundColor: Colors.transparent,  
+          backgroundColor: Colors.transparent,
           appBar: AppBar(
             backgroundColor: Colors.transparent,
             elevation: 0,
@@ -165,126 +83,136 @@ class PlayerStatsView extends StatelessWidget {
                   ),
             ),
           ),
-          body: ListView(
-            padding: const EdgeInsets.all(18.0),
-            children: [
-              _StatHeader(stats: stats),
-              const SizedBox(height: 14),
-              _SectionTitle('Evolución del Progreso'),
-              SizedBox(
-                height: 220,
-                child: LineChart(
-                  LineChartData(
-                    gridData: FlGridData(show: false),
-                    titlesData: FlTitlesData(show: false),
-                    borderData: FlBorderData(show: false),
-                    lineBarsData: [
-                      LineChartBarData(
-                        spots: progressData
-                            .map<FlSpot>((d) => FlSpot(
-                                  (d['date'] as DateTime).millisecondsSinceEpoch.toDouble(),
-                                  (d['progress'] as double),
-                                ))
-                            .toList(),
-                        isCurved: true,
-                        color: AppColors.primary,
-                        barWidth: 4,
-                        dotData: FlDotData(show: true),
-                      )
-                    ],
+          body: StreamBuilder<List<PlanAssignment>>(
+            stream: planAssignmentRepo.getAssignmentsForPlayer(playerId),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (snapshot.hasError) {
+                return Center(
+                  child: Text(
+                    "Error al cargar planes: ${snapshot.error}",
+                    style: const TextStyle(color: Colors.red),
+                    textAlign: TextAlign.center,
                   ),
-                ),
-              ),
-              const SizedBox(height: 26),
-              _SectionTitle('Estados de los Planes'),
-              SizedBox(
-                height: 180,
-                child: PieChart(
-                  PieChartData(
-                    sections: statusDistribution.entries.map((e) {
-                      final color = _pieColor(e.key);
-                      return PieChartSectionData(
-                        value: e.value.toDouble(),
-                        color: color,
-                        title: e.key,
-                        titleStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
-                        radius: 48,
-                      );
-                    }).toList(),
+                );
+              }
+              final assignments = snapshot.data ?? [];
+
+              // Contar planes por estado
+              final Map<String, int> statusDistribution = {
+                'Pendiente': 0,
+                'Aceptado': 0,
+                'Rechazado': 0,
+                'Completado': 0,
+              };
+              for (final assignment in assignments) {
+                final estado = estadoToString(assignment.status);
+                if (statusDistribution.containsKey(estado)) {
+                  statusDistribution[estado] = statusDistribution[estado]! + 1;
+                }
+              }
+
+              final totalAssigned = assignments.length;
+              final totalCompleted = statusDistribution['Completado'] ?? 0;
+              final totalAccepted = statusDistribution['Aceptado'] ?? 0;
+              final totalRejected = statusDistribution['Rechazado'] ?? 0;
+              final averageProgress = totalAssigned > 0 ? totalCompleted / totalAssigned : 0.0;
+
+              return ListView(
+                padding: const EdgeInsets.all(18.0),
+                children: [
+                  _StatHeader(
+                    stats: {
+                      'totalAssigned': totalAssigned,
+                      'totalAccepted': totalAccepted,
+                      'totalRejected': totalRejected,
+                      'totalCompleted': totalCompleted,
+                      'averageProgress': averageProgress,
+                    },
                   ),
-                ),
-              ),
-              const SizedBox(height: 26),
-              _SectionTitle('Comparativa Semanal'),
-              SizedBox(
-                height: 180,
-                child: BarChart(
-                  BarChartData(
-                    barGroups: weeklyComparison.asMap().entries.map((entry) {
-                      final i = entry.key;
-                      final value = entry.value['completed'];
-                      return BarChartGroupData(
-                        x: i,
-                        barRods: [
-                          BarChartRodData(
-                            toY: (value as int).toDouble(),
-                            color: AppColors.secondary,
-                            width: 16,
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                        ],
-                      );
-                    }).toList(),
-                    borderData: FlBorderData(show: false),
-                    titlesData: FlTitlesData(
-                      leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                      topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                      rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                      bottomTitles: AxisTitles(
-                        sideTitles: SideTitles(
-                          showTitles: true,
-                          getTitlesWidget: (double value, TitleMeta meta) {
-                            final weekIndex = value.toInt();
-                            if (weekIndex < weeklyComparison.length) {
-                              return Padding(
-                                padding: const EdgeInsets.only(top: 8.0),
-                                child: Text(weeklyComparison[weekIndex]['week'] ?? ''),
-                              );
-                            }
-                            return const Text('');
-                          },
-                        ),
+                  const SizedBox(height: 14),
+                  _SectionTitle('Estados de los Planes'),
+                  SizedBox(
+                    height: 180,
+                    child: PieChart(
+                      PieChartData(
+                        sections: statusDistribution.entries.map((e) {
+                          final color = _pieColor(e.key);
+                          return PieChartSectionData(
+                            value: e.value.toDouble(),
+                            color: color,
+                            title: '${e.key} (${e.value})',
+                            titleStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+                            radius: 48,
+                          );
+                        }).toList(),
                       ),
                     ),
-                    gridData: FlGridData(show: false),
                   ),
-                ),
-              ),
-            ],
+                  const SizedBox(height: 26),
+                  _SectionTitle('Distribución de Planes por Estado (Barras)'),
+                  SizedBox(
+                    height: 180,
+                    child: BarChart(
+                      BarChartData(
+                        alignment: BarChartAlignment.spaceAround,
+                        maxY: (statusDistribution.values.isEmpty)
+                            ? 1
+                            : (statusDistribution.values.reduce((a, b) => a > b ? a : b)).toDouble() + 1,
+                        barTouchData: BarTouchData(enabled: true),
+                        titlesData: FlTitlesData(
+                          leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: true)),
+                          bottomTitles: AxisTitles(
+                            sideTitles: SideTitles(
+                              showTitles: true,
+                              getTitlesWidget: (double value, TitleMeta meta) {
+                                final keys = statusDistribution.keys.toList();
+                                if (value.toInt() < keys.length) {
+                                  return Padding(
+                                    padding: const EdgeInsets.only(top: 8.0),
+                                    child: Text(
+                                      keys[value.toInt()],
+                                      style: TextStyle(
+                                        color: _pieColor(keys[value.toInt()]),
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  );
+                                }
+                                return const SizedBox.shrink();
+                              },
+                              reservedSize: 42,
+                            ),
+                          ),
+                        ),
+                        borderData: FlBorderData(show: false),
+                        barGroups: statusDistribution.entries.mapIndexed((index, entry) {
+                          return BarChartGroupData(
+                            x: index,
+                            barRods: [
+                              BarChartRodData(
+                                toY: entry.value.toDouble(),
+                                color: _pieColor(entry.key),
+                                width: 24,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                            ],
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
         ),
       ],
     );
   }
-
-  // Helper para color del pie chart
-  static Color _pieColor(String key) {
-    switch (key) {
-      case 'Pendiente':
-        return AppColors.warningDark;
-      case 'Aceptado':
-        return AppColors.primary;
-      case 'Rechazado':
-        return AppColors.errorDark;
-      case 'Completado':
-        return AppColors.successDark;
-      default:
-        return AppColors.primary.withOpacity(0.4);
-    }
-  }
 }
-
-// ========== COMPONENTES DE HEADER Y SECCIONES ==========
 
 class _StatHeader extends StatelessWidget {
   final Map<String, dynamic> stats;
@@ -306,22 +234,22 @@ class _StatHeader extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 _StatBox(
-                  value: stats['totalAssigned'],
+                  value: stats['totalAssigned'] ?? 0,
                   label: "Asignados",
                   color: AppColors.primary,
                 ),
                 _StatBox(
-                  value: stats['totalAccepted'],
+                  value: stats['totalAccepted'] ?? 0,
                   label: "Aceptados",
                   color: AppColors.successDark,
                 ),
                 _StatBox(
-                  value: stats['totalRejected'],
+                  value: stats['totalRejected'] ?? 0,
                   label: "Rechazados",
                   color: AppColors.errorDark,
                 ),
                 _StatBox(
-                  value: stats['totalCompleted'],
+                  value: stats['totalCompleted'] ?? 0,
                   label: "Completados",
                   color: AppColors.secondary,
                 ),

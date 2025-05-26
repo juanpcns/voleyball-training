@@ -54,8 +54,7 @@ class _TrainingPlansViewState extends State<TrainingPlansView> {
 
     if (players.isEmpty && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: const Text('No hay jugadores registrados.'), backgroundColor: AppColors.warningDark)
-      );
+          SnackBar(content: const Text('No hay jugadores registrados.'), backgroundColor: AppColors.warningDark));
       return;
     }
 
@@ -82,8 +81,8 @@ class _TrainingPlansViewState extends State<TrainingPlansView> {
                   splashColor: AppColors.primary.withOpacity(0.1),
                 );
               },
-              separatorBuilder: (context, index) => Divider(
-                height: 1, thickness: 1, color: AppColors.divider.withOpacity(0.5)),
+              separatorBuilder: (context, index) =>
+                  Divider(height: 1, thickness: 1, color: AppColors.divider.withOpacity(0.5)),
             ),
           ),
           actions: <Widget>[
@@ -96,12 +95,12 @@ class _TrainingPlansViewState extends State<TrainingPlansView> {
 
     if (selectedPlayerId != null && mounted) {
       final planProvider = context.read<TrainingPlanProvider>();
-      final success = await planProvider.assignPlanToPlayer(planId: planId, playerId: selectedPlayerId, planName: planName);
+      final success =
+          await planProvider.assignPlanToPlayer(planId: planId, playerId: selectedPlayerId, planName: planName);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(success ? '¡Plan asignado!' : planProvider.errorMessage ?? 'Error al asignar.'),
-          backgroundColor: success ? AppColors.successDark : colorScheme.error
-        ));
+            content: Text(success ? '¡Plan asignado!' : planProvider.errorMessage ?? 'Error al asignar.'),
+            backgroundColor: success ? AppColors.successDark : colorScheme.error));
       }
     }
   }
@@ -216,6 +215,11 @@ class _TrainingPlansViewState extends State<TrainingPlansView> {
               statusColor = AppColors.errorDark;
               statusText = "Rechazado";
               break;
+            case PlanAssignmentStatus.completado:
+              statusIcon = Icons.done_all;
+              statusColor = AppColors.secondary;
+              statusText = "Completado";
+              break;
             case PlanAssignmentStatus.pendiente:
             default:
               statusIcon = Icons.pending_actions;
@@ -250,7 +254,9 @@ class _TrainingPlansViewState extends State<TrainingPlansView> {
                             final prov = context.read<TrainingPlanProvider>();
                             final success = await prov.updatePlayerAssignmentStatus(assignment.id, PlanAssignmentStatus.aceptado);
                             if (mounted && !success) {
-                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: const Text('Error al aceptar'), backgroundColor: colorScheme.error));
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: const Text('Error al aceptar'), backgroundColor: colorScheme.error),
+                              );
                             }
                           },
                         ),
@@ -267,7 +273,9 @@ class _TrainingPlansViewState extends State<TrainingPlansView> {
                             final prov = context.read<TrainingPlanProvider>();
                             final success = await prov.updatePlayerAssignmentStatus(assignment.id, PlanAssignmentStatus.rechazado);
                             if (mounted && !success) {
-                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: const Text('Error al rechazar'), backgroundColor: colorScheme.error));
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: const Text('Error al rechazar'), backgroundColor: colorScheme.error),
+                              );
                             }
                           },
                         ),
@@ -279,7 +287,9 @@ class _TrainingPlansViewState extends State<TrainingPlansView> {
                   Navigator.push(context, MaterialPageRoute(builder: (_) => PlanDetailView(planId: assignment.planId)));
                 } else {
                   if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: const Text('ID de plan inválido'), backgroundColor: colorScheme.error));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: const Text('ID de plan inválido'), backgroundColor: colorScheme.error),
+                    );
                   }
                 }
               },
