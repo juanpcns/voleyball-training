@@ -5,6 +5,7 @@ import '../../providers/auth_provider.dart';
 import 'coach_players_list_view.dart';
 import 'player_stats_view.dart';
 import 'package:voleyballtraining/Views/Styles/colors/app_colors.dart';
+import 'package:voleyballtraining/Views/Styles/templates/home_view_template.dart';
 
 class StatsViewSelector extends StatelessWidget {
   final UserModel userModel;
@@ -15,53 +16,28 @@ class StatsViewSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     final user = context.read<AuthProvider>().currentUserModel;
 
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
-        title: Text(
-          'Estadísticas',
-          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
+    return HomeViewTemplate(
+      title: 'Estadísticas',
+      body: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(18),
+          // Aquí NO oscurecemos el fondo
+          // Si quieres agregar color semitransparente para legibilidad, ajusta aquí, sino déjalo transparente
+          color: Colors.transparent,
         ),
-        centerTitle: false,
-      ),
-      backgroundColor: AppColors.backgroundDark,
-      body: Stack(
-        children: [
-          // Imagen de fondo
-          Positioned.fill(
-            child: Image.asset(
-              'assets/images/fondo.png',
-              fit: BoxFit.cover,
-            ),
-          ),
-          // Sombra para mejorar legibilidad
-          Positioned.fill(
-            child: Container(
-              color: Colors.black.withOpacity(0.67),
-            ),
-          ),
-          // Contenido
-          user == null
-              ? const Center(child: CircularProgressIndicator())
-              : Padding(
-                  padding: const EdgeInsets.only(
-                    left: 12, right: 12, top: kToolbarHeight + 18, bottom: 16,
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 6),
+        child: user == null
+            ? const Center(child: CircularProgressIndicator())
+            : user.role == 'Entrenador'
+                ? const CoachPlayersListView()
+                : PlayerStatsView(
+                    playerId: user.userId,
+                    playerName: user.fullName,
+                    isCoach: false,
                   ),
-                  child: user.role == 'Entrenador'
-                      ? const CoachPlayersListView()
-                      : PlayerStatsView(
-                          playerId: user.userId,
-                          playerName: user.fullName,
-                        ),
-                ),
-        ],
       ),
+      // Si quieres agregar floatingActionButton condicional aquí, puedes
+      floatingActionButton: null,
     );
   }
 }

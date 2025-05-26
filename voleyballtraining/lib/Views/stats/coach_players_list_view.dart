@@ -13,76 +13,69 @@ class CoachPlayersListView extends StatelessWidget {
     final players = userProvider.playerUsers;
     final textTheme = Theme.of(context).textTheme;
 
-    return Stack(
-      children: [
-        // Imagen de fondo
-        Positioned.fill(
-          child: Image.asset(
-            'assets/images/fondo.png',
-            fit: BoxFit.cover,
-          ),
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(18),
+          color: Colors.transparent, // Sin oscurecer el fondo
         ),
-        Positioned.fill(
-          child: Container(
-            color: Colors.black.withOpacity(0.67),
-          ),
-        ),
-        // Contenido
-        Scaffold(
-          backgroundColor: Colors.transparent,
-          body: players.isEmpty
-              ? Center(
-                  child: Text(
-                    'No hay jugadores asignados.',
-                    style: textTheme.bodyLarge?.copyWith(
-                      color: AppColors.textGray,
-                      fontWeight: FontWeight.w500,
-                    ),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 6),
+        child: players.isEmpty
+            ? Center(
+                child: Text(
+                  'No hay jugadores asignados.',
+                  style: textTheme.bodyLarge?.copyWith(
+                    color: AppColors.textGray,
+                    fontWeight: FontWeight.w500,
                   ),
-                )
-              : ListView.builder(
-                  padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-                  itemCount: players.length,
-                  itemBuilder: (context, index) {
-                    final player = players[index];
-                    return Card(
-                      color: AppColors.surfaceDark,
+                ),
+              )
+            : ListView.builder(
+                itemCount: players.length,
+                itemBuilder: (context, index) {
+                  final player = players[index];
+                  return Card(
+                    color: AppColors.surfaceDark,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    elevation: 2,
+                    margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                    child: ListTile(
+                      leading: const Icon(Icons.account_circle, color: AppColors.primary, size: 38),
+                      title: Text(
+                        player.fullName,
+                        style: textTheme.titleMedium?.copyWith(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      subtitle: Text(
+                        player.email,
+                        style: textTheme.bodyMedium?.copyWith(
+                          color: AppColors.textGray,
+                        ),
+                      ),
+                      trailing: const Icon(Icons.arrow_forward_ios_rounded, color: AppColors.secondary, size: 22),
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => PlayerStatsView(
+                            playerId: player.userId,
+                            playerName: player.fullName,
+                            isCoach: true,
+                          ),
+                        ),
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      elevation: 2,
-                      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-                      child: ListTile(
-                        leading: const Icon(Icons.account_circle, color: AppColors.primary, size: 38),
-                        title: Text(
-                          player.fullName,
-                          style: textTheme.titleMedium?.copyWith(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        subtitle: Text(
-                          player.email,
-                          style: textTheme.bodyMedium?.copyWith(
-                            color: AppColors.textGray,
-                          ),
-                        ),
-                        trailing: const Icon(Icons.arrow_forward_ios_rounded, color: AppColors.secondary, size: 22),
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => PlayerStatsView(playerId: player.userId, playerName: player.fullName),
-                          ),
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-        ),
-      ],
+                    ),
+                  );
+                },
+              ),
+      ),
     );
   }
 }
