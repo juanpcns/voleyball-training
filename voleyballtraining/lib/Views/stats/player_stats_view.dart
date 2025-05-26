@@ -12,8 +12,89 @@ class PlayerStatsView extends StatelessWidget {
     required this.playerName,
   });
 
-  // --- MOCK DATA ---
-  Map<String, dynamic> get mockStats => {
+  // MOCK DATA para cada letra
+  Map<String, dynamic> get _mockStatsJ => {
+        'totalAssigned': 20,
+        'totalAccepted': 18,
+        'totalRejected': 0,
+        'totalCompleted': 16,
+        'averageProgress': 0.95,
+        'progressOverTime': [
+          {'date': DateTime(2024, 5, 1), 'progress': 0.25},
+          {'date': DateTime(2024, 5, 5), 'progress': 0.55},
+          {'date': DateTime(2024, 5, 10), 'progress': 0.75},
+          {'date': DateTime(2024, 5, 15), 'progress': 0.92},
+          {'date': DateTime(2024, 5, 20), 'progress': 1.0},
+        ],
+        'statusDistribution': {
+          'Pendiente': 2,
+          'Aceptado': 10,
+          'Rechazado': 0,
+          'Completado': 8,
+        },
+        'weeklyComparison': [
+          {'week': 'Semana 1', 'completed': 4},
+          {'week': 'Semana 2', 'completed': 5},
+          {'week': 'Semana 3', 'completed': 3},
+          {'week': 'Semana 4', 'completed': 4},
+        ]
+      };
+
+  Map<String, dynamic> get _mockStatsA => {
+        'totalAssigned': 8,
+        'totalAccepted': 6,
+        'totalRejected': 2,
+        'totalCompleted': 3,
+        'averageProgress': 0.55,
+        'progressOverTime': [
+          {'date': DateTime(2024, 5, 3), 'progress': 0.10},
+          {'date': DateTime(2024, 5, 7), 'progress': 0.30},
+          {'date': DateTime(2024, 5, 12), 'progress': 0.48},
+          {'date': DateTime(2024, 5, 18), 'progress': 0.55},
+          {'date': DateTime(2024, 5, 21), 'progress': 0.61},
+        ],
+        'statusDistribution': {
+          'Pendiente': 1,
+          'Aceptado': 4,
+          'Rechazado': 2,
+          'Completado': 3,
+        },
+        'weeklyComparison': [
+          {'week': 'Semana 1', 'completed': 1},
+          {'week': 'Semana 2', 'completed': 0},
+          {'week': 'Semana 3', 'completed': 2},
+          {'week': 'Semana 4', 'completed': 0},
+        ]
+      };
+
+  Map<String, dynamic> get _mockStatsO => {
+        'totalAssigned': 15,
+        'totalAccepted': 10,
+        'totalRejected': 3,
+        'totalCompleted': 7,
+        'averageProgress': 0.70,
+        'progressOverTime': [
+          {'date': DateTime(2024, 5, 2), 'progress': 0.15},
+          {'date': DateTime(2024, 5, 6), 'progress': 0.32},
+          {'date': DateTime(2024, 5, 11), 'progress': 0.58},
+          {'date': DateTime(2024, 5, 16), 'progress': 0.72},
+          {'date': DateTime(2024, 5, 22), 'progress': 0.90},
+        ],
+        'statusDistribution': {
+          'Pendiente': 3,
+          'Aceptado': 6,
+          'Rechazado': 2,
+          'Completado': 4,
+        },
+        'weeklyComparison': [
+          {'week': 'Semana 1', 'completed': 2},
+          {'week': 'Semana 2', 'completed': 2},
+          {'week': 'Semana 3', 'completed': 1},
+          {'week': 'Semana 4', 'completed': 2},
+        ]
+      };
+
+  Map<String, dynamic> get _mockStatsDefault => {
         'totalAssigned': 12,
         'totalAccepted': 8,
         'totalRejected': 2,
@@ -39,6 +120,14 @@ class PlayerStatsView extends StatelessWidget {
           {'week': 'Semana 4', 'completed': 4},
         ]
       };
+
+  Map<String, dynamic> get mockStats {
+    String initial = playerName.trim().isNotEmpty ? playerName.trim()[0].toUpperCase() : '';
+    if (initial == 'J') return _mockStatsJ;
+    if (initial == 'A') return _mockStatsA;
+    if (initial == 'O') return _mockStatsO;
+    return _mockStatsDefault;
+  }
 
   @override
   Widget build(BuildContext context) {
