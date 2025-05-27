@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart'; // ChangeNotifier y kDebugMode
+import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart' show FirebaseAuth, FirebaseAuthException, UserCredential;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../repositories/auth_repository_base.dart';
@@ -11,15 +11,12 @@ class AuthProvider with ChangeNotifier {
 
   AuthProvider(this._authRepository, this._userRepository);
 
-  // --- Estado Interno ---
   bool _isLoading = false;
   String? _errorMessage;
 
-  // --- Usuario autenticado (modelo completo) ---
   UserModel? _currentUserModel;
   UserModel? get currentUserModel => _currentUserModel;
 
-  // --- Getters Públicos para el Estado ---
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
@@ -36,9 +33,19 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  // --- MÉTODOS PRINCIPALES ---
+  // --- Escucha automática de usuario autenticado y carga el perfil de Firestore ---
+  void startListeningAuthChanges() {
+    _authRepository.authStateChanges.listen((firebaseUser) async {
+      if (firebaseUser != null) {
+        final userProfile = await _userRepository.getUserProfile(firebaseUser.uid);
+        _currentUserModel = userProfile;
+      } else {
+        _currentUserModel = null;
+      }
+      notifyListeners();
+    });
+  }
 
-  /// Registra un nuevo usuario y crea perfil en Firestore.
   Future<bool> signUpUser({
     required String email,
     required String password,
@@ -64,7 +71,6 @@ class AuthProvider with ChangeNotifier {
         throw Exception('Fallo en la creación del usuario en Firebase Auth.');
       }
 
-      // 2. Crear perfil en Firestore
       UserModel newUserProfile = UserModel(
         userId: userCredential.user!.uid,
         email: email,
@@ -78,7 +84,6 @@ class AuthProvider with ChangeNotifier {
 
       await _userRepository.createUserProfile(newUserProfile);
 
-      // 3. Cargar y exponer el modelo tras registro
       _currentUserModel = newUserProfile;
       notifyListeners();
 
@@ -105,7 +110,6 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  /// Inicia sesión y carga perfil de usuario de Firestore.
   Future<bool> signInUser({
     required String email,
     required String password,
@@ -127,7 +131,6 @@ class AuthProvider with ChangeNotifier {
       );
       if (kDebugMode) print("--- AuthProvider: signInUser Exitoso ---");
 
-      // Cargar modelo de usuario desde Firestore
       final user = userCredential.user ?? FirebaseAuth.instance.currentUser;
       if (user != null) {
         _currentUserModel = await _userRepository.getUserProfile(user.uid);
@@ -147,11 +150,10 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  /// Cierra la sesión y limpia el usuario actual.
   Future<void> signOutUser() async {
     if (kDebugMode) print("--- AuthProvider: Intentando signOutUser... ---");
     _setError(null);
-    _currentUserModel = null; // <--- Limpia el modelo de usuario
+    _currentUserModel = null;
     notifyListeners();
     try {
       await _authRepository.signOut();
@@ -161,7 +163,6 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  // --- Helper Privado ---
   String _mapAuthErrorCodeToMessage(String code) {
     switch (code) {
       case 'invalid-email': return 'El formato del correo electrónico no es válido.';

@@ -3,15 +3,12 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart' show User;
 import 'package:provider/provider.dart';
 import 'package:voleyballtraining/providers/chat_provider.dart';
-import 'firebase_options.dart'; // Opciones de Firebase
+import 'firebase_options.dart';
 
-// --- Importaciones de Estilos ---
 import 'package:voleyballtraining/Views/Styles/colors/app_colors.dart';
 import 'package:voleyballtraining/Views/Styles/tipography/text_styles.dart';
 import 'package:voleyballtraining/Views/Styles/buttons/custom_button_styles.dart';
-// --- Fin Importaciones de Estilos ---
 
-// Repositorios
 import 'repositories/auth_repository_base.dart';
 import 'repositories/firebase_auth_repository.dart';
 import 'repositories/user_repository_base.dart';
@@ -21,16 +18,12 @@ import 'repositories/firestore_training_plan_repository.dart';
 import 'repositories/plan_assignment_repository_base.dart';
 import 'repositories/firestore_plan_assignment_repository.dart';
 
-// Providers
 import 'providers/auth_provider.dart';
 import 'providers/training_plan_provider.dart';
 import 'providers/user_provider.dart';
 
-// Wrapper
 import 'auth_wrapper.dart';
-
-// Menú principal
-import 'Views/menu/main_menu_view.dart'; // <--- IMPORTANTE
+import 'Views/menu/main_menu_view.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -61,10 +54,14 @@ class MyApp extends StatelessWidget {
           },
         ),
         ChangeNotifierProxyProvider2<AuthRepositoryBase, UserRepositoryBase, AuthProvider>(
-          create: (context) => AuthProvider(
-            context.read<AuthRepositoryBase>(),
-            context.read<UserRepositoryBase>(),
-          ),
+          create: (context) {
+            final authProvider = AuthProvider(
+              context.read<AuthRepositoryBase>(),
+              context.read<UserRepositoryBase>(),
+            );
+            authProvider.startListeningAuthChanges(); // Aquí inicia la escucha automática
+            return authProvider;
+          },
           update: (context, authRepo, userRepo, previous) =>
               previous ?? AuthProvider(authRepo, userRepo),
         ),
@@ -195,9 +192,9 @@ class MyApp extends StatelessWidget {
           ),
         ),
         routes: {
-          '/menu': (context) => MainMenuView(), // <--- Ruta agregada
+          '/menu': (context) => MainMenuView(),
         },
-        home: const AuthWrapper(), // Tu widget que maneja la lógica de autenticación
+        home: const AuthWrapper(),
       ),
     );
   }
