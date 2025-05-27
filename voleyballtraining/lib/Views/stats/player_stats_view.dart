@@ -52,7 +52,6 @@ class PlayerStatsView extends StatelessWidget {
           Positioned.fill(
             child: Image.asset('assets/images/fondo.png', fit: BoxFit.cover),
           ),
-          // NO se pone Container con color negro semitransparente para que el fondo se vea claro
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: StreamBuilder<List<PlanAssignment>>(
@@ -92,31 +91,45 @@ class PlayerStatsView extends StatelessWidget {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                       margin: const EdgeInsets.only(bottom: 14),
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 22),
+                        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 24),
                         child: Column(
                           children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            Wrap(
+                              spacing: 16,
+                              runSpacing: 16,
+                              alignment: WrapAlignment.center,
                               children: [
-                                _StatBox(
-                                  value: totalAssigned,
-                                  label: "Asignados",
-                                  color: AppColors.primary,
+                                SizedBox(
+                                  width: 130,
+                                  child: _StatBox(
+                                    value: totalAssigned,
+                                    label: "Asignados",
+                                    color: AppColors.primary,
+                                  ),
                                 ),
-                                _StatBox(
-                                  value: totalAccepted,
-                                  label: "Aceptados",
-                                  color: AppColors.successDark,
+                                SizedBox(
+                                  width: 130,
+                                  child: _StatBox(
+                                    value: totalAccepted,
+                                    label: "Aceptados",
+                                    color: AppColors.successDark,
+                                  ),
                                 ),
-                                _StatBox(
-                                  value: totalRejected,
-                                  label: "Rechazados",
-                                  color: AppColors.errorDark,
+                                SizedBox(
+                                  width: 130,
+                                  child: _StatBox(
+                                    value: totalRejected,
+                                    label: "Rechazados",
+                                    color: AppColors.errorDark,
+                                  ),
                                 ),
-                                _StatBox(
-                                  value: totalCompleted,
-                                  label: "Completados",
-                                  color: AppColors.secondary,
+                                SizedBox(
+                                  width: 130,
+                                  child: _StatBox(
+                                    value: totalCompleted,
+                                    label: "Completados",
+                                    color: AppColors.secondary,
+                                  ),
                                 ),
                               ],
                             ),
@@ -144,7 +157,7 @@ class PlayerStatsView extends StatelessWidget {
                               value: e.value.toDouble(),
                               color: color,
                               title: '${e.key} (${e.value})',
-                              titleStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+                              titleStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 10),
                               radius: 48,
                             );
                           }).toList(),
@@ -154,7 +167,7 @@ class PlayerStatsView extends StatelessWidget {
                     const SizedBox(height: 26),
                     _SectionTitle('Distribución de Planes por Estado (Barras)'),
                     SizedBox(
-                      height: 180,
+                      height: 200,
                       child: BarChart(
                         BarChartData(
                           alignment: BarChartAlignment.spaceAround,
@@ -164,6 +177,7 @@ class PlayerStatsView extends StatelessWidget {
                           barTouchData: BarTouchData(enabled: true),
                           titlesData: FlTitlesData(
                             leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: true)),
+                            topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
                             bottomTitles: AxisTitles(
                               sideTitles: SideTitles(
                                 showTitles: true,
@@ -177,6 +191,7 @@ class PlayerStatsView extends StatelessWidget {
                                         style: TextStyle(
                                           color: _pieColor(keys[value.toInt()]),
                                           fontWeight: FontWeight.bold,
+                                          fontSize: 10,
                                         ),
                                       ),
                                     );
@@ -204,7 +219,6 @@ class PlayerStatsView extends StatelessWidget {
                         ),
                       ),
                     ),
-                    // Puedes agregar aquí otras gráficas o widgets si quieres
                   ],
                 );
               },

@@ -4,7 +4,6 @@ import '../../models/user_model.dart';
 import '../../providers/auth_provider.dart';
 import 'coach_players_list_view.dart';
 import 'player_stats_view.dart';
-import 'package:voleyballtraining/Views/Styles/colors/app_colors.dart';
 import 'package:voleyballtraining/Views/Styles/templates/home_view_template.dart';
 
 class StatsViewSelector extends StatelessWidget {

@@ -137,12 +137,12 @@ class MyApp extends StatelessWidget {
           cardTheme: CardTheme(
             elevation: 1,
             color: AppColors.surfaceDark,
-            margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12.0),
               side: BorderSide(
                 color: AppColors.divider.withOpacity(0.5),
-                width: 0.5,
+                width: 0,
               ),
             ),
           ),
