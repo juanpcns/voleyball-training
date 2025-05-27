@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:voleyballtraining/providers/training_plan_provider.dart';
+import 'package:voleyballtraining/providers/user_provider.dart';
 import 'package:voleyballtraining/Views/chats/chats_list_view.dart';
 import 'package:voleyballtraining/Views/plans/training_plans_view.dart';
 import '../../providers/auth_provider.dart';
@@ -11,14 +13,44 @@ import 'package:voleyballtraining/Views/Styles/templates/home_view_template.dart
 // IMPORTA LA NUEVA VISTA DE ESTADÍSTICAS
 import '../stats/stats_view_selector.dart';
 
-class MainMenuView extends StatelessWidget {
+class MainMenuView extends StatefulWidget {
   const MainMenuView({super.key});
+
+  @override
+  State<MainMenuView> createState() => _MainMenuViewState();
+}
+
+class _MainMenuViewState extends State<MainMenuView> {
+  bool _isInit = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isInit) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final authProvider = Provider.of<AuthProvider>(context, listen: false);
+        final trainingPlanProvider = Provider.of<TrainingPlanProvider>(context, listen: false);
+        final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+        final user = authProvider.currentUserModel;
+
+        if (user != null) {
+          if (user.role == 'Entrenador') {
+            trainingPlanProvider.loadCoachPlans();
+            userProvider.loadUsers();
+          } else {
+            trainingPlanProvider.loadPlayerAssignments();
+          }
+        }
+      });
+      _isInit = true;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<AuthProvider>(context).currentUserModel;
 
-    // LOADER mientras el modelo de usuario aún no esté disponible (solución robusta)
     if (user == null) {
       return const Scaffold(
         backgroundColor: Colors.transparent,
@@ -117,7 +149,7 @@ class MainMenuView extends StatelessWidget {
                           crossAxisCount: 2,
                           crossAxisSpacing: 18,
                           mainAxisSpacing: 18,
-                          childAspectRatio: 0.9, // Modificado para evitar overflow
+                          childAspectRatio: 0.9,
                         ),
                         children: [
                           _PanelButton(
@@ -164,7 +196,6 @@ class MainMenuView extends StatelessWidget {
                               );
                             },
                           ),
-                          // Solo para entrenadores: Ver Usuarios
                           if (user.role == 'Entrenador')
                             _PanelButton(
                               icon: Icons.group,
@@ -202,17 +233,14 @@ class MainMenuView extends StatelessWidget {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.black.withOpacity(0.80),
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 34, vertical: 14),
+                      padding: const EdgeInsets.symmetric(horizontal: 34, vertical: 14),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      textStyle: const TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 16),
+                      textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                     ),
                     onPressed: () async {
-                      await Provider.of<AuthProvider>(context, listen: false)
-                          .signOutUser();
+                      await Provider.of<AuthProvider>(context, listen: false).signOutUser();
                       if (context.mounted) {
                         Navigator.pushReplacementNamed(context, '/');
                       }

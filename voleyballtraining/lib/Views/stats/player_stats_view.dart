@@ -191,7 +191,7 @@ class PlayerStatsView extends StatelessWidget {
                                         style: TextStyle(
                                           color: _pieColor(keys[value.toInt()]),
                                           fontWeight: FontWeight.bold,
-                                          fontSize: 10,
+                                          fontSize: 7,
                                         ),
                                       ),
                                     );
