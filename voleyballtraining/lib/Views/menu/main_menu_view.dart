@@ -7,6 +7,7 @@ import '../profile/user_profile_view.dart';
 import '../users/user_list_view.dart';
 import 'package:voleyballtraining/Views/Styles/colors/app_colors.dart';
 import 'package:voleyballtraining/Views/Styles/templates/home_view_template.dart';
+
 // IMPORTA LA NUEVA VISTA DE ESTADÍSTICAS
 import '../stats/stats_view_selector.dart';
 
@@ -116,7 +117,7 @@ class MainMenuView extends StatelessWidget {
                           crossAxisCount: 2,
                           crossAxisSpacing: 18,
                           mainAxisSpacing: 18,
-                          childAspectRatio: 1.10,
+                          childAspectRatio: 0.9, // Modificado para evitar overflow
                         ),
                         children: [
                           _PanelButton(
@@ -254,19 +255,25 @@ class _PanelButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: Colors.white.withOpacity(0.24), width: 1),
           ),
-          padding: const EdgeInsets.symmetric(vertical: 16),
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 6),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(icon, size: 46, color: Colors.white),
               const SizedBox(height: 10),
-              Text(
-                label,
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                    ),
-                textAlign: TextAlign.center,
+              Flexible(
+                child: Text(
+                  label,
+                  softWrap: true,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
               ),
             ],
           ),
