@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart'; // Import necesario para WidgetsBinding
 import '../models/user_model.dart';
 import '../repositories/user_repository_base.dart';
 
@@ -67,7 +68,11 @@ class UserProvider with ChangeNotifier {
       _errorMessage = error;
       changed = true;
     }
-    if (changed) notifyListeners();
+    if (changed) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        notifyListeners();
+      });
+    }
   }
 
   // --- Cleanup ---
