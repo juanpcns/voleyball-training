@@ -30,6 +30,7 @@ class AuthProvider with ChangeNotifier {
   void _setError(String? message) {
     if (_errorMessage != message) {
       _errorMessage = message;
+      notifyListeners();
     }
   }
 
@@ -57,7 +58,6 @@ class AuthProvider with ChangeNotifier {
   }) async {
     _setError(null);
     _setLoading(true);
-    notifyListeners();
 
     try {
       if (kDebugMode) print("--- AuthProvider: Iniciando signUpUser ---");
@@ -93,19 +93,17 @@ class AuthProvider with ChangeNotifier {
 
     } on FirebaseAuthException catch (e) {
       if (e.code == 'email-already-in-use') {
-        _setError(null);
-        bool signInSuccess = await signInUser(email: email, password: password);
-        return signInSuccess;
+        _setError('El correo electrónico ya está registrado.');
+        _setLoading(false);
+        return false;
       } else {
         _setError(_mapAuthErrorCodeToMessage(e.code));
         _setLoading(false);
-        notifyListeners();
         return false;
       }
     } catch (e) {
       _setError('Error al guardar perfil: ${e.toString()}');
       _setLoading(false);
-      notifyListeners();
       return false;
     }
   }
@@ -165,14 +163,22 @@ class AuthProvider with ChangeNotifier {
 
   String _mapAuthErrorCodeToMessage(String code) {
     switch (code) {
-      case 'invalid-email': return 'El formato del correo electrónico no es válido.';
-      case 'user-disabled': return 'Este usuario ha sido deshabilitado.';
-      case 'user-not-found': return 'No se encontró un usuario con este correo electrónico.';
-      case 'wrong-password': return 'La contraseña es incorrecta.';
-      case 'email-already-in-use': return 'Este correo electrónico ya está registrado.';
-      case 'operation-not-allowed': return 'Operación no permitida (revisa Firebase Console).';
-      case 'weak-password': return 'La contraseña es demasiado débil (mínimo 6 caracteres).';
-      default: return 'Ocurrió un error de autenticación ($code).';
+      case 'invalid-email':
+        return 'El formato del correo electrónico no es válido.';
+      case 'user-disabled':
+        return 'Este usuario ha sido deshabilitado.';
+      case 'user-not-found':
+        return 'No se encontró un usuario con este correo electrónico.';
+      case 'wrong-password':
+        return 'La contraseña es incorrecta.';
+      case 'email-already-in-use':
+        return 'Este correo electrónico ya está registrado.';
+      case 'operation-not-allowed':
+        return 'Operación no permitida (revisa Firebase Console).';
+      case 'weak-password':
+        return 'La contraseña es demasiado débil (mínimo 6 caracteres).';
+      default:
+        return 'Ocurrió un error de autenticación ($code).';
     }
   }
 }
