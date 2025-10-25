@@ -252,11 +252,6 @@ void main() {
     });
 
     testWidgets('TC-008: Visualización de lista de usuarios (sin usuarios)', (WidgetTester tester) async {
-      // NOTA: Esta prueba requiere un usuario "Entrenador" especial en tu
-      // base de datos que no tenga jugadores asociados, o una BD vacía.
-      // Asumiremos que tenemos un usuario "entrenadorvacio@test.com" para esta prueba.
-      
-      // 1. Precondición: Iniciar sesión como Entrenador (sin jugadores)
       await loginAs(tester, 'entrenadorvacio@test.com', '12345678');
 
       // 2. Navegar a Usuarios
