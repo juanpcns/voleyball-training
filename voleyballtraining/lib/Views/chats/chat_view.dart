@@ -154,6 +154,8 @@ class _ChatViewState extends State<ChatView> {
                 children: [
                   Expanded(
                     child: TextField(
+                      // <<<--- AÑADIDO (para TC-004)
+                      key: const Key('chat_message_field'),
                       controller: _controller,
                       minLines: 1,
                       maxLines: 4,
@@ -179,6 +181,8 @@ class _ChatViewState extends State<ChatView> {
                   ),
                   const SizedBox(width: 8),
                   ElevatedButton(
+                    // <<<--- AÑADIDO (para TC-004)
+                    key: const Key('chat_send_button'),
                     onPressed: () => _sendMessage(context),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,

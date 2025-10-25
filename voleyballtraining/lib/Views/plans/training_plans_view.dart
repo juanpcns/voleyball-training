@@ -75,6 +75,8 @@ class _TrainingPlansViewState extends State<TrainingPlansView> {
               itemBuilder: (listContext, index) {
                 final player = players[index];
                 return ListTile(
+                  // <<<--- AÑADIDO (para TC-001)
+                  key: Key('select_player_item_${player.userId}'),
                   title: Text(player.fullName, style: textTheme.bodyLarge),
                   subtitle: Text(player.email, style: textTheme.bodyMedium?.copyWith(color: AppColors.textGray)),
                   onTap: () => Navigator.pop(dialogContext, player.userId),
@@ -115,6 +117,8 @@ class _TrainingPlansViewState extends State<TrainingPlansView> {
       body: _buildBody(planProvider, isCoach, context),
       floatingActionButton: isCoach
           ? FloatingActionButton(
+              // <<<--- AÑADIDO (para TC-009, TC-010)
+              key: const Key('plans_create_plan_fab'),
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
               tooltip: 'Crear nuevo plan',
@@ -170,6 +174,8 @@ class _TrainingPlansViewState extends State<TrainingPlansView> {
           return Card(
             margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
             child: ListTile(
+              // <<<--- AÑADIDO (para TC-001)
+              key: Key('plan_item_${plan.id}'),
               leading: Icon(Icons.fitness_center, color: colorScheme.primary.withOpacity(0.8)),
               title: Text(plan.planName, style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
               subtitle: Text(
@@ -177,6 +183,8 @@ class _TrainingPlansViewState extends State<TrainingPlansView> {
                 style: textTheme.bodySmall,
               ),
               trailing: IconButton(
+                // <<<--- AÑADIDO (para TC-001)
+                key: Key('plan_assign_button_${plan.id}'),
                 icon: Icon(Icons.assignment_ind_outlined, color: colorScheme.secondary),
                 tooltip: 'Asignar Plan a Jugador',
                 onPressed: () => _showPlayerSelectionDialog(context, plan.id, plan.planName),
@@ -231,6 +239,8 @@ class _TrainingPlansViewState extends State<TrainingPlansView> {
           return Card(
             margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
             child: ListTile(
+              // <<<--- AÑADIDO (para TC-002)
+              key: Key('assignment_item_${assignment.id}'),
               leading: Tooltip(message: statusText, child: Icon(statusIcon, color: statusColor)),
               title: Text(assignment.planName ?? 'Plan ID: ${assignment.planId}', style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
               subtitle: Text(
@@ -243,6 +253,8 @@ class _TrainingPlansViewState extends State<TrainingPlansView> {
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
                         IconButton(
+                          // <<<--- AÑADIDO (para TC-002)
+                          key: Key('assignment_accept_button_${assignment.id}'),
                           icon: const Icon(Icons.check_circle_outline),
                           color: AppColors.successDark,
                           tooltip: 'Aceptar Plan',
@@ -262,6 +274,8 @@ class _TrainingPlansViewState extends State<TrainingPlansView> {
                         ),
                         const SizedBox(width: 4),
                         IconButton(
+                          // <<<--- AÑADIDO (para TC-002)
+                          key: Key('assignment_reject_button_${assignment.id}'),
                           icon: const Icon(Icons.cancel_outlined),
                           color: AppColors.errorDark,
                           tooltip: 'Rechazar Plan',

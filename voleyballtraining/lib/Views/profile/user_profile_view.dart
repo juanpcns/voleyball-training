@@ -64,6 +64,8 @@ class UserProfileView extends StatelessWidget {
                   const Spacer(),
                   Center(
                     child: ElevatedButton.icon(
+                      // <<<--- AÑADIDO
+                      key: const Key('profile_edit_button'),
                       style: CustomButtonStyles.primary(),
                       onPressed: () {
                         ScaffoldMessenger.of(context).showSnackBar(

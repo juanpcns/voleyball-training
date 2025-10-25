@@ -154,6 +154,8 @@ class _PlanDetailViewState extends State<PlanDetailView> {
                               if (!isTrainer)
                                 Center(
                                   child: ElevatedButton(
+                                    // <<<--- AÑADIDO
+                                    key: const Key('plan_detail_complete_button'),
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: AppColors.successDark,
                                       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),

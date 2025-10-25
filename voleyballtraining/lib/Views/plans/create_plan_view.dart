@@ -61,6 +61,8 @@ class _CreatePlanViewState extends State<CreatePlanView> {
        if (mounted) {
          ScaffoldMessenger.of(context).showSnackBar(
            SnackBar(
+             // <<<--- AÑADIDO (para TC-010)
+             key: const Key('snackbar_min_2_exercises'),
              content: const Text('Debes añadir al menos 2 ejercicios.'),
              backgroundColor: AppColors.warningDark,
            ),
@@ -136,6 +138,8 @@ class _CreatePlanViewState extends State<CreatePlanView> {
 
                       // --- Campos del Plan ---
                       TextFormField(
+                        // <<<--- AÑADIDO (para TC-010)
+                        key: const Key('create_plan_name_field'),
                         controller: _planNameController,
                         enabled: !_isSaving,
                         decoration: const InputDecoration(labelText: 'Nombre del Plan *'),
@@ -144,6 +148,8 @@ class _CreatePlanViewState extends State<CreatePlanView> {
                        ),
                       const SizedBox(height: 15),
                       TextFormField(
+                        // <<<--- AÑADIDO (para TC-010)
+                        key: const Key('create_plan_time_field'),
                         controller: _avgTimeController,
                         enabled: !_isSaving,
                         decoration: const InputDecoration(labelText: 'Tiempo Promedio Diario (Ej: 30 min)'),
@@ -151,6 +157,8 @@ class _CreatePlanViewState extends State<CreatePlanView> {
                       ),
                       const SizedBox(height: 15),
                       TextFormField(
+                        // <<<--- AÑADIDO (para TC-010)
+                        key: const Key('create_plan_description_field'),
                         controller: _descriptionController,
                         enabled: !_isSaving,
                         decoration: const InputDecoration(labelText: 'Descripción (Opcional)'),
@@ -166,6 +174,8 @@ class _CreatePlanViewState extends State<CreatePlanView> {
                       Row(children: [
                           Expanded(
                             child: TextFormField(
+                              // <<<--- AÑADIDO (para TC-010)
+                              key: const Key('create_plan_exercise_input_field'),
                               controller: _exerciseInputController,
                               enabled: !_isSaving,
                               decoration: const InputDecoration(
@@ -178,6 +188,8 @@ class _CreatePlanViewState extends State<CreatePlanView> {
                           ),
                           const SizedBox(width: 8),
                           IconButton(
+                            // <<<--- AÑADIDO (para TC-010)
+                            key: const Key('create_plan_add_exercise_button'),
                             icon: Icon(Icons.add_circle, color: colorScheme.primary, size: 30),
                             tooltip: 'Añadir Ejercicio',
                             onPressed: _isSaving ? null : _addExercise,
@@ -210,9 +222,13 @@ class _CreatePlanViewState extends State<CreatePlanView> {
                             itemCount: _addedExercises.length,
                             itemBuilder: (context, index) {
                                return ListTile(
+                                  // <<<--- AÑADIDO (para TC-010)
+                                  key: Key('exercise_item_$index'),
                                   dense: true,
                                   title: Text(_addedExercises[index], style: textTheme.bodyMedium),
                                   trailing: IconButton(
+                                    // <<<--- AÑADIDO (para TC-010)
+                                    key: Key('delete_exercise_button_$index'),
                                     icon: Icon(Icons.delete_outline, color: colorScheme.error, size: 20),
                                     tooltip: 'Eliminar ejercicio',
                                     onPressed: _isSaving ? null : () => _removeExercise(index),
@@ -228,6 +244,8 @@ class _CreatePlanViewState extends State<CreatePlanView> {
 
                       // --- Botón Guardar ---
                       ElevatedButton.icon(
+                          // <<<--- AÑADIDO (para TC-010)
+                          key: const Key('create_plan_save_button'),
                           style: CustomButtonStyles.primary(),
                           onPressed: _isSaving ? null : _submitCreatePlan,
                           icon: _isSaving

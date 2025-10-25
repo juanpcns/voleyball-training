@@ -153,6 +153,8 @@ class _MainMenuViewState extends State<MainMenuView> {
                         ),
                         children: [
                           _PanelButton(
+                            // <<<--- AÑADIDO (para TC-002)
+                            key: const Key('menu_profile_button'), 
                             icon: Icons.account_circle,
                             label: 'Perfil',
                             onTap: () => Navigator.push(
@@ -163,6 +165,8 @@ class _MainMenuViewState extends State<MainMenuView> {
                             ),
                           ),
                           _PanelButton(
+                            // <<<--- AÑADIDO (para TC-001, TC-002, TC-009, TC-010)
+                            key: const Key('menu_plans_button'),
                             icon: Icons.assignment,
                             label: 'Planes',
                             onTap: () => Navigator.push(
@@ -173,6 +177,8 @@ class _MainMenuViewState extends State<MainMenuView> {
                             ),
                           ),
                           _PanelButton(
+                            // <<<--- AÑADIDO (para TC-003, TC-004)
+                            key: const Key('menu_chats_button'),
                             icon: Icons.chat_rounded,
                             label: 'Chats',
                             onTap: () {
@@ -185,6 +191,8 @@ class _MainMenuViewState extends State<MainMenuView> {
                             },
                           ),
                           _PanelButton(
+                            // <<<--- AÑADIDO
+                            key: const Key('menu_stats_button'),
                             icon: Icons.bar_chart_rounded,
                             label: 'Estadísticas',
                             onTap: () {
@@ -198,6 +206,8 @@ class _MainMenuViewState extends State<MainMenuView> {
                           ),
                           if (user.role == 'Entrenador')
                             _PanelButton(
+                              // <<<--- AÑADIDO (para TC-001, TC-007, TC-008)
+                              key: const Key('menu_users_button'),
                               icon: Icons.group,
                               label: 'Ver Usuarios',
                               onTap: () {
@@ -230,6 +240,8 @@ class _MainMenuViewState extends State<MainMenuView> {
                     ],
                   ),
                   child: ElevatedButton(
+                    // <<<--- AÑADIDO
+                    key: const Key('menu_logout_button'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.black.withOpacity(0.80),
                       foregroundColor: Colors.white,
@@ -266,6 +278,7 @@ class _PanelButton extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.onTap,
+    super.key, // <<<--- AÑADIDO (para pasar la key)
   });
 
   @override

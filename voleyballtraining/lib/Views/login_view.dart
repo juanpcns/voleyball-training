@@ -76,6 +76,8 @@ class _LoginViewState extends State<LoginView> {
                     const SizedBox(height: 35),
 
                     TextFormField(
+                      // <<<--- AÑADIDO (para TC-001, TC-002, TC-003, TC-004, TC-007, TC-008, TC-009, TC-010)
+                      key: const Key('login_email_field'),
                       controller: _emailController,
                       enabled: !authProvider.isLoading,
                       decoration: const InputDecoration(labelText: 'Correo Electrónico'),
@@ -89,6 +91,8 @@ class _LoginViewState extends State<LoginView> {
                     const SizedBox(height: 20),
 
                     TextFormField(
+                      // <<<--- AÑADIDO (para TC-001, TC-002, TC-003, TC-004, TC-007, TC-008, TC-009, TC-010)
+                      key: const Key('login_password_field'),
                       controller: _passwordController,
                       enabled: !authProvider.isLoading,
                       decoration: const InputDecoration(labelText: 'Contraseña'),
@@ -106,6 +110,8 @@ class _LoginViewState extends State<LoginView> {
                             child: CircularProgressIndicator(),
                           ))
                         : ElevatedButton(
+                            // <<<--- AÑADIDO (para TC-001, TC-002, TC-003, TC-004, TC-007, TC-008, TC-009, TC-010)
+                            key: const Key('login_button'),
                             style: CustomButtonStyles.primary(),
                             onPressed: authProvider.isLoading ? null : _submitLogin,
                             child: const Text('Iniciar Sesión'),
@@ -113,6 +119,8 @@ class _LoginViewState extends State<LoginView> {
                     const SizedBox(height: 20),
 
                     TextButton(
+                      // <<<--- AÑADIDO (para TC-005, TC-006)
+                      key: const Key('login_register_button'),
                       onPressed: authProvider.isLoading ? null : widget.onGoToRegister,
                       child: const Text('¿No tienes cuenta? Regístrate'),
                     ),

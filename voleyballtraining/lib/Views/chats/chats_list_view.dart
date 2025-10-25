@@ -85,6 +85,8 @@ class _ChatsListViewState extends State<ChatsListView> {
                     margin: const EdgeInsets.symmetric(vertical: 3, horizontal: 4),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(17)),
                     child: ListTile(
+                      // <<<--- AÑADIDO (para TC-004)
+                      key: Key('chat_item_${chat.id}'),
                       leading: CircleAvatar(
                         radius: 26,
                         backgroundColor: AppColors.secondary.withOpacity(0.96),
@@ -142,6 +144,8 @@ class _ChatsListViewState extends State<ChatsListView> {
       floatingActionButton: currentUser == null
           ? null
           : FloatingActionButton(
+              // <<<--- AÑADIDO (para TC-003)
+              key: const Key('chats_new_chat_fab'),
               onPressed: () {
                 Navigator.push(
                   context,

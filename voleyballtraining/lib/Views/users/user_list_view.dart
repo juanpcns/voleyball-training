@@ -1,4 +1,4 @@
-  import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
   import 'package:provider/provider.dart';
 
   import '../../models/user_model.dart';
@@ -54,7 +54,10 @@
             final users = snapshot.data ?? [];
 
             if (users.isEmpty) {
-              return const Center(child: Text('No se encontraron usuarios.'));
+              return const Center(
+                // <<<--- AÑADIDO (para TC-008)
+                child: Text('No se encontraron usuarios.', key: Key('users_empty_list_text')),
+              );
             }
 
             return ListView.builder(
@@ -67,6 +70,8 @@
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   margin: const EdgeInsets.symmetric(vertical: 6),
                   child: ListTile(
+                    // <<<--- AÑADIDO (para TC-001, TC-007)
+                    key: Key('user_item_${user.userId}'),
                     leading: CircleAvatar(
                       backgroundColor: AppColors.primary,
                       child: Text(user.fullName.isNotEmpty ? user.fullName[0].toUpperCase() : '?'),

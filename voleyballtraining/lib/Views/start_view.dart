@@ -95,6 +95,8 @@ class _LoginViewState extends State<LoginView> {
 
                            // --- Email ---
                             TextFormField(
+                              // <<<--- AÑADIDO (para TC-001, TC-002, TC-003, TC-004, TC-007, TC-008, TC-009, TC-010)
+                              key: const Key('login_email_field'), 
                               controller: _emailController,
                               enabled: !authProvider.isLoading,
                               decoration: const InputDecoration(labelText: 'Correo Electrónico'), // <-- Tema maneja el estilo
@@ -105,6 +107,8 @@ class _LoginViewState extends State<LoginView> {
 
                            // --- Contraseña ---
                            TextFormField(
+                             // <<<--- AÑADIDO (para TC-001, TC-002, TC-003, TC-004, TC-007, TC-008, TC-009, TC-010)
+                             key: const Key('login_password_field'),
                              controller: _passwordController,
                              enabled: !authProvider.isLoading,
                              decoration: const InputDecoration(labelText: 'Contraseña'), // <-- Tema maneja el estilo
@@ -118,6 +122,8 @@ class _LoginViewState extends State<LoginView> {
                              ? const Center(child: Padding(padding: EdgeInsets.symmetric(vertical: 16.0), child: CircularProgressIndicator()))
                               // --- > Usar ElevatedButton con estilo del tema <---
                              : ElevatedButton(
+                                 // <<<--- AÑADIDO (para TC-001, TC-002, TC-003, TC-004, TC-007, TC-008, TC-009, TC-010)
+                                 key: const Key('login_button'),
                                  style: CustomButtonStyles.primary(), // <-- Aplicar estilo primario
                                  onPressed: authProvider.isLoading ? null : _submitLogin,
                                  child: const Text('Iniciar Sesión'),
@@ -127,6 +133,8 @@ class _LoginViewState extends State<LoginView> {
                            // --- Botón para ir a Registro ---
                             // TextButton hereda estilo del tema (color naranja)
                            TextButton(
+                             // <<<--- AÑADIDO (para TC-005, TC-006)
+                             key: const Key('login_register_button'),
                              onPressed: authProvider.isLoading ? null : widget.onGoToRegister,
                              child: const Text('¿No tienes cuenta? Regístrate'),
                            ),

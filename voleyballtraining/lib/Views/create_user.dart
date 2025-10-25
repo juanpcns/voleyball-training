@@ -91,6 +91,8 @@ class _CreateUserState extends State<CreateUser> {
                     const SizedBox(height: 30),
 
                     TextFormField(
+                      // <<<--- AÑADIDO (para TC-005, TC-006)
+                      key: const Key('register_name_field'),
                       controller: _fullNameController,
                       enabled: !authProvider.isLoading,
                       decoration: const InputDecoration(labelText: 'Nombre Completo'),
@@ -104,6 +106,8 @@ class _CreateUserState extends State<CreateUser> {
                     const SizedBox(height: 20),
 
                     TextFormField(
+                      // <<<--- AÑADIDO (para TC-005, TC-006)
+                      key: const Key('register_email_field'),
                       controller: _emailController,
                       enabled: !authProvider.isLoading,
                       decoration: const InputDecoration(labelText: 'Correo Electrónico'),
@@ -117,6 +121,8 @@ class _CreateUserState extends State<CreateUser> {
                     const SizedBox(height: 20),
 
                     TextFormField(
+                      // <<<--- AÑADIDO (para TC-005, TC-006)
+                      key: const Key('register_password_field'),
                       controller: _passwordController,
                       enabled: !authProvider.isLoading,
                       decoration: const InputDecoration(labelText: 'Contraseña'),
@@ -130,6 +136,8 @@ class _CreateUserState extends State<CreateUser> {
                     const SizedBox(height: 20),
 
                     TextFormField(
+                      // <<<--- AÑADIDO (para TC-005, TC-006)
+                      key: const Key('register_confirm_password_field'),
                       controller: _confirmPasswordController,
                       enabled: !authProvider.isLoading,
                       decoration: const InputDecoration(labelText: 'Confirmar Contraseña'),
@@ -143,6 +151,8 @@ class _CreateUserState extends State<CreateUser> {
                     const SizedBox(height: 20),
 
                     DropdownButtonFormField<String>(
+                      // <<<--- AÑADIDO (para TC-005, TC-006)
+                      key: const Key('register_role_dropdown'),
                       value: _selectedRole,
                       dropdownColor: AppColors.surfaceDark.withOpacity(0.95),
                       decoration: const InputDecoration(labelText: 'Selecciona tu Rol'),
@@ -170,6 +180,8 @@ class _CreateUserState extends State<CreateUser> {
                             ),
                           )
                         : ElevatedButton(
+                            // <<<--- AÑADIDO (para TC-005, TC-006)
+                            key: const Key('register_button'),
                             style: CustomButtonStyles.primary(),
                             onPressed: authProvider.isLoading ? null : _submitForm,
                             child: const Text('Crear Usuario'),
@@ -177,6 +189,8 @@ class _CreateUserState extends State<CreateUser> {
                     const SizedBox(height: 15),
 
                     TextButton(
+                      // <<<--- AÑADIDO
+                      key: const Key('register_login_button'),
                       onPressed: authProvider.isLoading ? null : widget.onGoToLogin,
                       child: const Text('¿Ya tienes cuenta? Inicia Sesión'),
                     ),

@@ -35,6 +35,8 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  integration_test: # <--- AÑADE ESTA
+    sdk: flutter # <--- Y ESTA
 
   flutter_lints: ^3.0.0 # Actualizado a versión más reciente (o usa la que prefieras)
 
@@ -67,8 +69,3 @@ flutter:
           weight: 600
         - asset: assets/fonts/Poppins-Bold.ttf
           weight: 700
-        # Puedes añadir más pesos si los necesitas (e.g., Black 900, Italic, etc.)
-        # Ejemplo Italic:
-        # - asset: assets/fonts/Poppins-RegularItalic.ttf
-        #   style: italic
-        #   weight: 400

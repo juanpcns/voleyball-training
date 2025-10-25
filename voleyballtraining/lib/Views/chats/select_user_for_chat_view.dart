@@ -55,6 +55,8 @@ class SelectUserForChatView extends StatelessWidget {
                         ),
                       ),
                       child: ListTile(
+                        // <<<--- AÑADIDO (para TC-003)
+                        key: Key('select_chat_user_item_${user.userId}'),
                         leading: CircleAvatar(
                           backgroundColor: AppColors.primary.withOpacity(0.72),
                           child: Text(
