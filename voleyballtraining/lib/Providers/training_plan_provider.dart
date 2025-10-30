@@ -22,13 +22,13 @@ class TrainingPlanProvider with ChangeNotifier {
 
   // --- Estado Coach ---
   List<TrainingPlan> _coachPlans = [];
-  bool _isLoadingCoachPlans = false;
+  final bool _isLoadingCoachPlans = false;
   String? _coachPlansError;
   StreamSubscription? _coachPlansSubscription;
 
   // --- Estado Jugador ---
   List<PlanAssignment> _playerAssignments = [];
-  bool _isLoadingPlayerAssignments = false;
+  final bool _isLoadingPlayerAssignments = false;
   String? _playerAssignmentsError;
   StreamSubscription? _playerAssignmentsSubscription;
 

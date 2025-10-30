@@ -54,7 +54,7 @@ class _TrainingPlansViewState extends State<TrainingPlansView> {
 
     if (players.isEmpty && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: const Text('No hay jugadores registrados.'), backgroundColor: AppColors.warningDark));
+          const SnackBar(content: Text('No hay jugadores registrados.'), backgroundColor: AppColors.warningDark));
       return;
     }
 
@@ -126,7 +126,7 @@ class _TrainingPlansViewState extends State<TrainingPlansView> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => CreatePlanView()),
+                  MaterialPageRoute(builder: (_) => const CreatePlanView()),
                 );
               },
             )

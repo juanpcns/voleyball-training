@@ -13,7 +13,7 @@ import 'package:voleyballtraining/Views/Styles/templates/home_view_template.dart
 class SelectUserForChatView extends StatelessWidget {
   final UserModel currentUser;
 
-  const SelectUserForChatView({Key? key, required this.currentUser}) : super(key: key);
+  const SelectUserForChatView({super.key, required this.currentUser});
 
   @override
   Widget build(BuildContext context) {

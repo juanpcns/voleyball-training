@@ -12,7 +12,7 @@ import 'package:voleyballtraining/Views/Styles/colors/app_colors.dart';
 import 'package:voleyballtraining/Views/Styles/templates/home_view_template.dart';
 
 class ChatsListView extends StatefulWidget {
-  const ChatsListView({Key? key}) : super(key: key);
+  const ChatsListView({super.key});
 
   @override
   State<ChatsListView> createState() => _ChatsListViewState();
@@ -155,9 +155,9 @@ class _ChatsListViewState extends State<ChatsListView> {
                 );
               },
               backgroundColor: AppColors.primary,
-              child: const Icon(Icons.chat, color: Colors.white, size: 32),
               tooltip: 'Nuevo chat',
               elevation: 4,
+              child: const Icon(Icons.chat, color: Colors.white, size: 32),
             ),
     );
   }

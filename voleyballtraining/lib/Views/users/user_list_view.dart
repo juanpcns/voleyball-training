@@ -13,7 +13,7 @@ import 'package:flutter/material.dart';
   class UserListView extends StatefulWidget {
     final UserModel userModel;
 
-    const UserListView({Key? key, required this.userModel}) : super(key: key);
+    const UserListView({super.key, required this.userModel});
 
     @override
     State<UserListView> createState() => _UserListViewState();

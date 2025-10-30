@@ -9,7 +9,7 @@ import 'package:voleyballtraining/Views/Styles/templates/home_view_template.dart
 class StatsViewSelector extends StatelessWidget {
   final UserModel userModel;
 
-  const StatsViewSelector({Key? key, required this.userModel}) : super(key: key);
+  const StatsViewSelector({super.key, required this.userModel});
 
   @override
   Widget build(BuildContext context) {

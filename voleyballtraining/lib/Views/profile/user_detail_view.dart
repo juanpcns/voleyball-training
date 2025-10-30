@@ -72,10 +72,10 @@ class UserDetailView extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   // Icono redondo
-                  CircleAvatar(
+                  const CircleAvatar(
                     backgroundColor: AppColors.primary,
                     radius: 30,
-                    child: const Icon(Icons.sports_volleyball, color: Colors.white, size: 30),
+                    child: Icon(Icons.sports_volleyball, color: Colors.white, size: 30),
                   ),
                   const SizedBox(height: 16),
                   // Título
