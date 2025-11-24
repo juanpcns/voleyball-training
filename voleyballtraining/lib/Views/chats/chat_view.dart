@@ -11,11 +11,11 @@ class ChatView extends StatefulWidget {
   final String? otherUserName; // opcional, para mostrar el nombre del contacto
 
   const ChatView({
-    Key? key,
+    super.key,
     required this.chatId,
     required this.currentUserId,
     this.otherUserName,
-  }) : super(key: key);
+  });
 
   @override
   State<ChatView> createState() => _ChatViewState();
@@ -165,12 +165,12 @@ class _ChatViewState extends State<ChatView> {
                         fillColor: Colors.white.withOpacity(0.06),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(14),
-                          borderSide: BorderSide(
+                          borderSide: const BorderSide(
                               color: AppColors.primary, width: 1),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(14),
-                          borderSide: BorderSide(
+                          borderSide: const BorderSide(
                               color: AppColors.primary, width: 2),
                         ),
                         contentPadding: const EdgeInsets.symmetric(

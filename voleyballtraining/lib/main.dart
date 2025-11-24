@@ -94,8 +94,6 @@ class MyApp extends StatelessWidget {
             onSecondary: AppColors.textLight,
             error: AppColors.errorDark,
             onError: AppColors.textDark,
-            background: AppColors.backgroundDark,
-            onBackground: AppColors.textLight,
             surface: AppColors.surfaceDark,
             onSurface: AppColors.textLight,
           ),
@@ -149,23 +147,23 @@ class MyApp extends StatelessWidget {
           inputDecorationTheme: InputDecorationTheme(
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.0),
-              borderSide: BorderSide(color: AppColors.divider),
+              borderSide: const BorderSide(color: AppColors.divider),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.0),
-              borderSide: BorderSide(color: AppColors.divider),
+              borderSide: const BorderSide(color: AppColors.divider),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.0),
-              borderSide: BorderSide(color: AppColors.primary, width: 2.0),
+              borderSide: const BorderSide(color: AppColors.primary, width: 2.0),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.0),
-              borderSide: BorderSide(color: AppColors.errorDark, width: 1.5),
+              borderSide: const BorderSide(color: AppColors.errorDark, width: 1.5),
             ),
             focusedErrorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.0),
-              borderSide: BorderSide(color: AppColors.errorDark, width: 2.0),
+              borderSide: const BorderSide(color: AppColors.errorDark, width: 2.0),
             ),
             labelStyle: CustomTextStyles.bodyWhite.copyWith(color: AppColors.textGray),
             hintStyle: CustomTextStyles.bodyWhite.copyWith(color: AppColors.textGray),
@@ -192,7 +190,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
         routes: {
-          '/menu': (context) => MainMenuView(),
+          '/menu': (context) => const MainMenuView(),
         },
         home: const AuthWrapper(),
       ),

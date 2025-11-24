@@ -182,26 +182,17 @@ class _PlanDetailViewState extends State<PlanDetailView> {
                                                 orElse: () => throw Exception('No assignment found'),
                                               );
 
-                                              if (assignment == null) {
-                                                ScaffoldMessenger.of(context).showSnackBar(
-                                                  SnackBar(
-                                                    content: Text('No se encontró la asignación para este plan.'),
-                                                    backgroundColor: AppColors.errorDark,
-                                                  ),
-                                                );
-                                              } else {
-                                                await assignmentRepo.updateAssignmentStatus(
-                                                  assignment.id,
-                                                  PlanAssignmentStatus.completado,
-                                                );
-                                                ScaffoldMessenger.of(context).showSnackBar(
-                                                  SnackBar(
-                                                    content: Text('Plan marcado como completado.'),
-                                                    backgroundColor: AppColors.successDark,
-                                                  ),
-                                                );
-                                              }
-                                            } catch (e) {
+                                              await assignmentRepo.updateAssignmentStatus(
+                                                assignment.id,
+                                                PlanAssignmentStatus.completado,
+                                              );
+                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                SnackBar(
+                                                  content: Text('Plan marcado como completado.'),
+                                                  backgroundColor: AppColors.successDark,
+                                                ),
+                                              );
+                                                                                        } catch (e) {
                                               ScaffoldMessenger.of(context).showSnackBar(
                                                 SnackBar(
                                                   content: Text('Ocurrió un error: $e'),
@@ -215,7 +206,7 @@ class _PlanDetailViewState extends State<PlanDetailView> {
                                             }
                                           },
                                     child: _marcandoCompletado
-                                        ? SizedBox(
+                                        ? const SizedBox(
                                             height: 24,
                                             width: 24,
                                             child: CircularProgressIndicator(

@@ -6,8 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:voleyballtraining/main.dart' as app; 
-import 'package:voleyballtraining/Views/plans/create_plan_view.dart';
-import 'package:voleyballtraining/Views/plans/training_plans_view.dart';
 
 Future<void> longDelay(WidgetTester tester) async {
   await tester.pumpAndSettle(const Duration(seconds: 6)); 

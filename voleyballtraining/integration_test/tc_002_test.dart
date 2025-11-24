@@ -9,8 +9,6 @@ import 'package:integration_test/integration_test.dart';
 import 'package:voleyballtraining/main.dart' as app; 
 
 // Importa las vistas que necesitamos para las pruebas
-import 'package:voleyballtraining/Views/plans/create_plan_view.dart';
-import 'package:voleyballtraining/Views/plans/training_plans_view.dart';
 
 /// FUNCIÓN DE AYUDA:
 /// Un delay largo para esperar operaciones de red (Firebase).

@@ -60,10 +60,10 @@ class _CreatePlanViewState extends State<CreatePlanView> {
     if (_addedExercises.length < 2) {
        if (mounted) {
          ScaffoldMessenger.of(context).showSnackBar(
-           SnackBar(
+           const SnackBar(
              // <<<--- AÑADIDO (para TC-010)
-             key: const Key('snackbar_min_2_exercises'),
-             content: const Text('Debes añadir al menos 2 ejercicios.'),
+             key: Key('snackbar_min_2_exercises'),
+             content: Text('Debes añadir al menos 2 ejercicios.'),
              backgroundColor: AppColors.warningDark,
            ),
          );

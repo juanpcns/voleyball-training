@@ -13,27 +13,27 @@ class CustomButtonStyles {
   /// Estilo base común para botones elevados y delineados.
   /// Define padding, forma y tamaño mínimo.
   static final ButtonStyle _baseElevatedOutlinedStyle = ButtonStyle(
-    textStyle: MaterialStateProperty.all(CustomTextStyles.button), // Estilo de texto base para botones
-    padding: MaterialStateProperty.all(
+    textStyle: WidgetStateProperty.all(CustomTextStyles.button), // Estilo de texto base para botones
+    padding: WidgetStateProperty.all(
       const EdgeInsets.symmetric(horizontal: 24, vertical: 12)
     ),
-    shape: MaterialStateProperty.all(
+    shape: WidgetStateProperty.all(
       RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8.0), // Bordes redondeados estándar
       ),
     ),
-    minimumSize: MaterialStateProperty.all(const Size(88, 44)), // Tamaño mínimo W3C
+    minimumSize: WidgetStateProperty.all(const Size(88, 44)), // Tamaño mínimo W3C
     // Control de elevación y otros efectos se manejan por estado en cada estilo específico
     // para permitir diferencias (ej. botón primario vs. outlined).
     // Añade overlayColor para feedback visual al presionar/hover
-    overlayColor: MaterialStateProperty.resolveWith<Color?>(
-      (Set<MaterialState> states) {
-        if (states.contains(MaterialState.hovered)) {
+    overlayColor: WidgetStateProperty.resolveWith<Color?>(
+      (Set<WidgetState> states) {
+        if (states.contains(WidgetState.hovered)) {
           // Usa el color primario/secundario con baja opacidad para hover
           // Necesitamos saber el color base para hacer esto bien, se ajusta abajo
           return null; // Ajustado en estilos específicos
         }
-        if (states.contains(MaterialState.pressed)) {
+        if (states.contains(WidgetState.pressed)) {
            // Usa el color primario/secundario con más opacidad para pressed
           return null; // Ajustado en estilos específicos
         }
@@ -46,18 +46,18 @@ class CustomButtonStyles {
   /// Fondo: [AppColors.primary], Texto: [AppColors.textLight]
   static ButtonStyle primary() {
     return _baseElevatedOutlinedStyle.copyWith(
-      backgroundColor: MaterialStateProperty.resolveWith<Color>(
-        (Set<MaterialState> states) {
-          if (states.contains(MaterialState.disabled)) {
+      backgroundColor: WidgetStateProperty.resolveWith<Color>(
+        (Set<WidgetState> states) {
+          if (states.contains(WidgetState.disabled)) {
             // Usar color deshabilitado específico del tema oscuro/claro
             return AppColors.disabled; // Ajustado en AppColors para tema oscuro
           }
           return AppColors.primary; // Color primario normal (Naranja)
         },
       ),
-      foregroundColor: MaterialStateProperty.resolveWith<Color>(
-         (Set<MaterialState> states) {
-          if (states.contains(MaterialState.disabled)) {
+      foregroundColor: WidgetStateProperty.resolveWith<Color>(
+         (Set<WidgetState> states) {
+          if (states.contains(WidgetState.disabled)) {
              // Usar color de texto deshabilitado específico del tema oscuro/claro
             return AppColors.textDisabled; // Ajustado en AppColors para tema oscuro
           }
@@ -65,21 +65,21 @@ class CustomButtonStyles {
           return AppColors.textLight;
         },
       ),
-       elevation: MaterialStateProperty.resolveWith<double>(
-        (Set<MaterialState> states) {
-          if (states.contains(MaterialState.disabled)) return 0;
-          if (states.contains(MaterialState.pressed)) return 6; // Más elevación al presionar
-          if (states.contains(MaterialState.hovered)) return 4; // Elevación media en hover
+       elevation: WidgetStateProperty.resolveWith<double>(
+        (Set<WidgetState> states) {
+          if (states.contains(WidgetState.disabled)) return 0;
+          if (states.contains(WidgetState.pressed)) return 6; // Más elevación al presionar
+          if (states.contains(WidgetState.hovered)) return 4; // Elevación media en hover
           return 2; // Elevación normal
         },
       ),
-       overlayColor: MaterialStateProperty.resolveWith<Color?>(
-        (Set<MaterialState> states) {
+       overlayColor: WidgetStateProperty.resolveWith<Color?>(
+        (Set<WidgetState> states) {
           // Feedback visual sobre el color primario
-          if (states.contains(MaterialState.hovered)) {
+          if (states.contains(WidgetState.hovered)) {
             return AppColors.textLight.withOpacity(0.08); // Blanco sutil
           }
-          if (states.contains(MaterialState.pressed)) {
+          if (states.contains(WidgetState.pressed)) {
             return AppColors.textLight.withOpacity(0.12); // Blanco más notable
           }
           return null;
@@ -92,38 +92,38 @@ class CustomButtonStyles {
   /// Fondo: [AppColors.secondary], Texto: [AppColors.textLight]
   static ButtonStyle secondary() {
      return _baseElevatedOutlinedStyle.copyWith(
-      backgroundColor: MaterialStateProperty.resolveWith<Color>(
-        (Set<MaterialState> states) {
-          if (states.contains(MaterialState.disabled)) {
+      backgroundColor: WidgetStateProperty.resolveWith<Color>(
+        (Set<WidgetState> states) {
+          if (states.contains(WidgetState.disabled)) {
             return AppColors.disabled;
           }
           return AppColors.secondary; // Color secundario normal (Azul)
         },
       ),
-      foregroundColor: MaterialStateProperty.resolveWith<Color>(
-         (Set<MaterialState> states) {
-          if (states.contains(MaterialState.disabled)) {
+      foregroundColor: WidgetStateProperty.resolveWith<Color>(
+         (Set<WidgetState> states) {
+          if (states.contains(WidgetState.disabled)) {
             return AppColors.textDisabled;
           }
           // Texto sobre Azul también debería ser claro
           return AppColors.textLight;
         },
       ),
-       elevation: MaterialStateProperty.resolveWith<double>(
-        (Set<MaterialState> states) {
-           if (states.contains(MaterialState.disabled)) return 0;
-           if (states.contains(MaterialState.pressed)) return 6;
-           if (states.contains(MaterialState.hovered)) return 4;
+       elevation: WidgetStateProperty.resolveWith<double>(
+        (Set<WidgetState> states) {
+           if (states.contains(WidgetState.disabled)) return 0;
+           if (states.contains(WidgetState.pressed)) return 6;
+           if (states.contains(WidgetState.hovered)) return 4;
            return 2;
         },
       ),
-        overlayColor: MaterialStateProperty.resolveWith<Color?>(
-        (Set<MaterialState> states) {
+        overlayColor: WidgetStateProperty.resolveWith<Color?>(
+        (Set<WidgetState> states) {
            // Feedback visual sobre el color secundario
-          if (states.contains(MaterialState.hovered)) {
+          if (states.contains(WidgetState.hovered)) {
             return AppColors.textLight.withOpacity(0.08); // Blanco sutil
           }
-          if (states.contains(MaterialState.pressed)) {
+          if (states.contains(WidgetState.pressed)) {
             return AppColors.textLight.withOpacity(0.12); // Blanco más notable
           }
           return null;
@@ -144,13 +144,13 @@ class CustomButtonStyles {
           borderRadius: BorderRadius.circular(8.0), // Bordes consistentes
        ),
      ).copyWith(
-        overlayColor: MaterialStateProperty.resolveWith<Color?>(
-        (Set<MaterialState> states) {
+        overlayColor: WidgetStateProperty.resolveWith<Color?>(
+        (Set<WidgetState> states) {
            // Feedback visual usando el color primario con opacidad
-          if (states.contains(MaterialState.hovered)) {
+          if (states.contains(WidgetState.hovered)) {
             return AppColors.primary.withOpacity(0.08);
           }
-          if (states.contains(MaterialState.pressed)) {
+          if (states.contains(WidgetState.pressed)) {
             return AppColors.primary.withOpacity(0.12);
           }
           return null;
@@ -164,36 +164,36 @@ class CustomButtonStyles {
    static ButtonStyle outlined() {
      return _baseElevatedOutlinedStyle.copyWith(
        // Sin color de fondo por defecto
-       backgroundColor: MaterialStateProperty.all(Colors.transparent),
+       backgroundColor: WidgetStateProperty.all(Colors.transparent),
        // Color del texto y borde
-       foregroundColor: MaterialStateProperty.resolveWith<Color>(
-         (Set<MaterialState> states) {
-            if (states.contains(MaterialState.disabled)) {
+       foregroundColor: WidgetStateProperty.resolveWith<Color>(
+         (Set<WidgetState> states) {
+            if (states.contains(WidgetState.disabled)) {
               return AppColors.textDisabled;
             }
             return AppColors.primary; // Naranja
          }
        ),
        // Definición del borde
-       side: MaterialStateProperty.resolveWith<BorderSide>(
-         (Set<MaterialState> states) {
+       side: WidgetStateProperty.resolveWith<BorderSide>(
+         (Set<WidgetState> states) {
             Color borderColor = AppColors.primary;
-            if (states.contains(MaterialState.disabled)) {
+            if (states.contains(WidgetState.disabled)) {
               borderColor = AppColors.disabled;
             }
             return BorderSide(color: borderColor, width: 1.5);
          }
        ),
        // Quitar elevación por defecto para outlined
-       elevation: MaterialStateProperty.all(0),
+       elevation: WidgetStateProperty.all(0),
        // Ajustar overlay para que tenga fondo al presionar/hover
-        overlayColor: MaterialStateProperty.resolveWith<Color?>(
-        (Set<MaterialState> states) {
+        overlayColor: WidgetStateProperty.resolveWith<Color?>(
+        (Set<WidgetState> states) {
            // Feedback visual usando el color primario con opacidad como fondo
-          if (states.contains(MaterialState.hovered)) {
+          if (states.contains(WidgetState.hovered)) {
             return AppColors.primary.withOpacity(0.08);
           }
-          if (states.contains(MaterialState.pressed)) {
+          if (states.contains(WidgetState.pressed)) {
             return AppColors.primary.withOpacity(0.12);
           }
           return null;

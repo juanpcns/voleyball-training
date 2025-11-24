@@ -11,8 +11,6 @@ import 'package:voleyballtraining/main.dart' as app;
 // Importa las vistas que necesitamos para las pruebas
 // (Aunque TC-003 no las usa directamente, las mantenemos por consistencia
 // y porque las funciones de ayuda podrían necesitarlas indirectamente)
-import 'package:voleyballtraining/Views/plans/create_plan_view.dart';
-import 'package:voleyballtraining/Views/plans/training_plans_view.dart';
 
 /// FUNCIÓN DE AYUDA:
 /// Un delay largo para esperar operaciones de red (Firebase).

@@ -146,7 +146,7 @@ class PlayerStatsView extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 14),
-                    _SectionTitle('Estados de los Planes'),
+                    const _SectionTitle('Estados de los Planes'),
                     SizedBox(
                       height: 180,
                       child: PieChart(
@@ -165,7 +165,7 @@ class PlayerStatsView extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 26),
-                    _SectionTitle('Distribución de Planes por Estado (Barras)'),
+                    const _SectionTitle('Distribución de Planes por Estado (Barras)'),
                     SizedBox(
                       height: 200,
                       child: BarChart(
@@ -174,10 +174,10 @@ class PlayerStatsView extends StatelessWidget {
                           maxY: (statusDistribution.values.isEmpty)
                               ? 1
                               : (statusDistribution.values.reduce((a, b) => a > b ? a : b)).toDouble() + 1,
-                          barTouchData: BarTouchData(enabled: true),
+                          barTouchData: const BarTouchData(enabled: true),
                           titlesData: FlTitlesData(
-                            leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: true)),
-                            topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                            leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: true)),
+                            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                             bottomTitles: AxisTitles(
                               sideTitles: SideTitles(
                                 showTitles: true,
