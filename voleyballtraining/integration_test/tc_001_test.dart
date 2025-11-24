@@ -1,4 +1,3 @@
-// [ Pega el BLOQUE COMÚN de arriba aquí ]
 // --- INICIO DEL BLOQUE COMÚN ---
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -7,35 +6,46 @@ import 'package:voleyballtraining/main.dart' as app;
 import 'package:voleyballtraining/Views/plans/create_plan_view.dart';
 import 'package:voleyballtraining/Views/plans/training_plans_view.dart';
 
+/// SOLUCIÓN 1: Delay robusto para esperar red (Firebase)
+/// Reemplazamos pumpAndSettle por un pump (espera dura) + pumpAndSettle (espera de animaciones)
 Future<void> longDelay(WidgetTester tester) async {
-  await tester.pumpAndSettle(const Duration(seconds: 5));
+  // 1. Espera "dura" de 8 segundos para operaciones de red (Firebase/Firestore)
+  await tester.pump(const Duration(seconds: 8));
+  // 2. Espera para que terminen las animaciones (navegación, etc.)
+  await tester.pumpAndSettle();
 }
+
 Future<void> shortDelay(WidgetTester tester) async {
   await tester.pumpAndSettle(const Duration(milliseconds: 500));
 }
+
+/// SOLUCIÓN 2: Función de Login corregida
 Future<void> loginAs(WidgetTester tester, String email, String password) async {
+  // 1. Iniciar la app
   app.main();
   await tester.pumpAndSettle();
   
-  // <<< PAUSA EXTRA antes de escribir email
-  await tester.pump(const Duration(seconds: 2));
+  // SOLUCIÓN 2a: Espera inicial única y larga (10s) para que Firebase 
+  // se inicialice y muestre la pantalla de Login.
+  // (Reemplaza todas tus pausas de 2 segundos)
+  await tester.pump(const Duration(seconds: 10)); 
   
+  // 2. Escribir en los campos
   await tester.enterText(find.byKey(const Key('login_email_field')), email);
-  
-  // <<< PAUSA EXTRA después de escribir email
-  await tester.pump(const Duration(seconds: 2));
-  
   await tester.enterText(find.byKey(const Key('login_password_field')), password);
   
-  // <<< PAUSA EXTRA después de escribir contraseña
-  await tester.pump(const Duration(seconds: 2));
+  // SOLUCIÓN 2b: ¡LA CORRECCIÓN CLAVE!
+  // Ocultamos el teclado simulando que el usuario presiona "Hecho".
+  await tester.testTextInput.receiveAction(TextInputAction.done);
+  await tester.pump(); // Damos un frame para que la UI reaccione y el teclado se oculte
   
+  // 3. Pulsar el botón de login (ahora sí está visible)
   await tester.tap(find.byKey(const Key('login_button')));
-  await longDelay(tester); // Espera larga para el login
   
-  // <<< PAUSA EXTRA después del login
-  await tester.pump(const Duration(seconds: 2));
+  // 4. Usar el longDelay robusto para esperar el login y la navegación
+  await longDelay(tester); 
   
+  // 5. Verificar que el login fue exitoso
   expect(find.text('Bienvenido'), findsOneWidget);
 }
 // --- FIN DEL BLOQUE COMÚN ---
@@ -45,7 +55,7 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('TC-001: Asignación exitosa de un plan a un jugador', (WidgetTester tester) async {
-    // 1. Precondición: Iniciar sesión como Entrenador (con pausas añadidas en loginAs)
+    // 1. Precondición: Iniciar sesión como Entrenador (con la función corregida)
     await loginAs(tester, 'entrenadortest@gmail.com', '12345678');
 
     // 2. Pasos (según PDF)
@@ -53,7 +63,7 @@ void main() {
     await tester.tap(find.byKey(const Key('menu_plans_button')));
     await longDelay(tester); // Esperar que carguen los planes
     
-    // <<< PAUSA EXTRA después de cargar planes
+    // (Tus pausas extras ya no son tan necesarias, pero no hacen daño)
     await tester.pump(const Duration(seconds: 2));
     print("Paso 2 completado: Lista de planes cargada.");
 
@@ -72,7 +82,6 @@ void main() {
     await tester.tap(assignButton);
     await longDelay(tester); // Esperar que cargue la lista de jugadores
     
-    // <<< PAUSA EXTRA después de abrir diálogo de jugadores
     await tester.pump(const Duration(seconds: 2));
     print("Paso 3 completado: Diálogo de jugadores abierto.");
 
@@ -81,7 +90,6 @@ void main() {
     await tester.tap(find.text('Jugador Test'));
     await longDelay(tester); // Esperar que se cierre el diálogo y se asigne
     
-    // <<< PAUSA EXTRA después de asignar
     await tester.pump(const Duration(seconds: 2));
     print("Paso 4 completado: Jugador seleccionado y asignación procesada.");
 
@@ -90,7 +98,6 @@ void main() {
     expect(find.text('¡Plan asignado!'), findsOneWidget);
     print("Paso 5 completado: ¡Prueba TC-001 Exitosa!");
     
-    // <<< PAUSA EXTRA al final para ver el resultado
     await tester.pump(const Duration(seconds: 3));
   });
 }

@@ -1,0 +1,59 @@
+rules_version = '2'; // Usa la versión 2 (actual)
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ====================================================================
+    // 1. REGLA POR DEFECTO: DENIEGA TODO
+    // Esta regla bloquea cualquier otra colección que no se especifique abajo. 
+    // Siempre se debe denegar por defecto, excepto donde se permita explícitamente.
+    // ====================================================================
+    match /{document=**} {
+      allow read, write: if false; 
+    }
+
+    // ====================================================================
+    // 2. COLECCIÓN DE USUARIOS ('users') - CRÍTICO PARA IDOR/BOLA
+    // Se asume que el ID del documento es el UID de Firebase Auth.
+    // ====================================================================
+    match /users/{userId} {
+      // Permite leer y escribir SÓLO si el usuario está autenticado (request.auth != null)
+      // Y si el UID del usuario coincide con el ID del documento que se está solicitando ({userId}).
+      // Esto previene que User A acceda a los datos de User B.
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // ====================================================================
+    // 3. COLECCIÓN DE PLANES DE ENTRENAMIENTO ('trainingPlans')
+    // Asumimos que todos los usuarios autenticados pueden leer los planes, 
+    // pero solo un "coach" puede crearlos, editarlos o borrarlos.
+    // (NOTA: Necesitas un campo personalizado como 'role' o 'isCoach' en el token JWT o en el documento del plan/usuario)
+    // ====================================================================
+    match /trainingPlans/{planId} {
+      // Permitir la lectura a cualquier usuario autenticado
+      allow read: if request.auth != null;
+
+      // Permitir la escritura/modificación SÓLO si el usuario autenticado es un coach.
+      // Aquí se asume que tienes un claim personalizado 'isCoach' en el token de Auth.
+      // Si no usas custom claims, puedes verificar un campo en su documento de usuario:
+      // Ejemplo alternativo: get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'coach'
+      allow create, update, delete: if request.auth != null && request.auth.token.isCoach == true;
+    }
+
+    // ====================================================================
+    // 4. CHAT (Asumiendo una colección 'chats' con subcolecciones de mensajes)
+    // Permite el acceso solo si el UID del usuario está en el documento del chat.
+    // ====================================================================
+    match /chats/{chatId} {
+      // Se asume que cada documento de chat tiene un array o un mapa de participantes, 
+      // y el UID del usuario debe estar en esa lista (ej. resource.data.participants).
+      allow read, write: if request.auth != null && request.auth.uid in resource.data.participants;
+
+      // Subcolección de mensajes dentro de un chat
+      match /messages/{messageId} {
+        // Hereda la regla del chat padre, asegurando que solo los participantes puedan leer/escribir mensajes.
+        allow read, write: if request.auth != null && request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants;
+      }
+    }
+  }
+}
